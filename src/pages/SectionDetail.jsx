@@ -4,8 +4,10 @@ import { months, CURRENT_YEAR } from '../data/constants';
 import { ArrowLeft, Phone, Check, Edit2 } from 'lucide-react';
 
 const SectionDetail = ({ sections, payments, onSetPayment, onUpdatePlayer, currentYear }) => {
-    const { monthId, id: sectionId } = useParams(); // 'id' from router is sectionId
+    const { monthId, year, id: sectionId } = useParams(); // 'id' from router is sectionId
     const navigate = useNavigate();
+
+    const targetYear = year ? parseInt(year) : currentYear;
 
     // Modals state
     const [modalOpen, setModalOpen] = useState(false); // Pay Confirm
@@ -32,7 +34,7 @@ const SectionDetail = ({ sections, payments, onSetPayment, onUpdatePlayer, curre
     }
 
     // Helper to check payment status
-    const isPaid = (playerId) => payments && !!payments[`${currentYear}_${monthId}_${playerId}`];
+    const isPaid = (playerId) => payments && !!payments[`${targetYear}_${monthId}_${playerId}`];
 
     // Calculate local stats
     let totalPaid = 0;
@@ -75,7 +77,7 @@ const SectionDetail = ({ sections, payments, onSetPayment, onUpdatePlayer, curre
     const confirmPayment = () => {
         if (pin === '2003') {
             if (selectedPlayer) {
-                onSetPayment(monthId, selectedPlayer.id, true); // true = paid
+                onSetPayment(monthId, targetYear, selectedPlayer.id, true); // true = paid
                 setModalOpen(false);
                 setSelectedPlayer(null);
                 setPin('');
@@ -87,7 +89,7 @@ const SectionDetail = ({ sections, payments, onSetPayment, onUpdatePlayer, curre
 
     const confirmUnpay = () => {
         if (pin === '2003') {
-            onSetPayment(monthId, selectedPlayer.id, false); // false = unpaid
+            onSetPayment(monthId, targetYear, selectedPlayer.id, false); // false = unpaid
             setAuthModalOpen(false);
             setSelectedPlayer(null);
             setPin('');
@@ -175,7 +177,7 @@ const SectionDetail = ({ sections, payments, onSetPayment, onUpdatePlayer, curre
                     {/* Section Selector */}
                     <select
                         value={section.id}
-                        onChange={(e) => navigate(`/month/${monthId}/section/${e.target.value}`)}
+                        onChange={(e) => navigate(`/month/${monthId}/year/${targetYear}/section/${e.target.value}`)}
                         style={{
                             fontSize: '1.5rem',
                             fontWeight: '800',
@@ -201,7 +203,7 @@ const SectionDetail = ({ sections, payments, onSetPayment, onUpdatePlayer, curre
                         fontWeight: '600',
                         color: '#64748B',
                     }}>
-                        {month.name} {currentYear}
+                        {month.name} {targetYear}
                     </div>
                 </div>
             </div>

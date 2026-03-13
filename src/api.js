@@ -1,127 +1,213 @@
+import { createClient } from '@supabase/supabase-js';
 
-const API_BASE = '/api';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-const getHeaders = () => {
-    const token = localStorage.getItem('gaop_token');
-    return {
-        'Content-Type': 'application/json',
-        'Authorization': token ? `Bearer ${token}` : ''
-    };
-};
-
+// Keep logic mostly similar to avoid large rewrites,
+// we just redirect the actual fetching to Supabase instead of `/api/*`
 export const api = {
-    // Login
+    // Login via Supabase stored procedure (secure server-side password verification)
     login: async (username, password) => {
-        const res = await fetch(`${API_BASE}/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
+        const { data, error } = await supabase.rpc('verify_login', {
+            p_username: username,
+            p_password: password
         });
-        if (!res.ok) throw new Error('Invalid credentials');
-        return await res.json();
+
+        if (error) {
+            console.error('Login RPC error:', error);
+            throw new Error('Invalid credentials');
+        }
+
+        if (!data || !data.success) {
+            throw new Error(data?.error || 'Invalid credentials');
+        }
+
+        // Generate a simple session token (base64 encoded payload)
+        const tokenPayload = JSON.stringify({
+            username: data.username,
+            role: data.role,
+            exp: Date.now() + (8 * 60 * 60 * 1000) // 8 hours
+        });
+        const token = btoa(tokenPayload);
+
+        return {
+            token,
+            username: data.username,
+            role: data.role
+        };
     },
 
-    // Init: Fetch all data + Merge with LocalStorage
+    // Fetch all data
     init: async () => {
         try {
-            const res = await fetch(`${API_BASE}/init`, {
-                headers: getHeaders()
+            // Fetch Sections
+            const { data: sectionsData, error: secErr } = await supabase.from('sections').select('*');
+            if (secErr) throw secErr;
+
+            // Fetch Players (to attach to sections)
+            const { data: playersData, error: plErr } = await supabase.from('players').select('*');
+            if (plErr) throw plErr;
+
+            // Map players into their sections
+            const enrichedSections = sectionsData.map(sec => ({
+                id: sec.id,
+                title: sec.title,
+                players: playersData.filter(p => p.section_id === sec.id).map(p => ({
+                    id: p.id,
+                    name: p.name,
+                    parent: p.parent,
+                    phone: p.phone,
+                    price: Number(p.price)
+                }))
+            }));
+
+            // User requested explicit ordering of sections
+            const sectionOrder = [
+                'junior',
+                'u11_boys',
+                'u12_boys',
+                'u14_boys',
+                'u14_girls',
+                'paidiko',
+                'korasides',
+                'efiviko'
+            ];
+
+            enrichedSections.sort((a, b) => {
+                const indexA = sectionOrder.indexOf(a.id);
+                const indexB = sectionOrder.indexOf(b.id);
+                // If an id is not in the list, send it to the back
+                return (indexA === -1 ? 99 : indexA) - (indexB === -1 ? 99 : indexB);
             });
 
-            if (res.status === 401) {
-                console.warn("Unauthorized (401). Clearing token and redirecting to login.");
-                localStorage.removeItem('gaop_token');
-                localStorage.removeItem('gaop_username');
-                window.location.href = '/login';
-                return { sections: [], payments: {}, records: [] };
-            }
+            // Fetch Payments
+            const { data: paymentsData, error: payErr } = await supabase.from('payments').select('*');
+            if (payErr) throw payErr;
 
-            let serverData = { sections: [], payments: {}, records: [] };
+            // Convert list of payments to object dictionary by key
+            const paymentsMap = {};
+            paymentsData.forEach(p => {
+                paymentsMap[p.key] = {
+                    isPaid: p.is_paid,
+                    amount: p.amount,
+                    athleteName: p.athlete_name,
+                    parentName: p.parent_name,
+                    department: p.department
+                };
+            });
 
-            if (res.ok) {
-                serverData = await res.json();
-            } else {
-                console.warn("Server Init Failed, using Local Storage fallback.");
-            }
+            // Fetch Records
+            const { data: recordsData, error: recErr } = await supabase.from('records').select('*');
+            if (recErr) throw recErr;
 
-            // --- LOCAL STORAGE MERGE STRATEGY ---
-            // We read local payments to ensure what the user just did isn't lost.
-            const localPayments = JSON.parse(localStorage.getItem('gaop_payments_backup') || '{}');
-
-            // Merge: Local takes precedence if server is empty? 
-            // Or Union? Let's do Union.
-            const mergedPayments = { ...serverData.payments, ...localPayments };
-
+            // Return shape matching what the App.jsx expects
             return {
-                ...serverData,
-                payments: mergedPayments
+                sections: enrichedSections,
+                payments: paymentsMap,
+                records: recordsData
             };
-
         } catch (e) {
-            console.error("Init Error, falling back to local:", e);
-            // Fallback Only
-            return {
-                sections: [], // Note: If sections fail, we might need initialData, but sections usually load fine.
-                payments: JSON.parse(localStorage.getItem('gaop_payments_backup') || '{}'),
-                records: []
-            };
+            console.error("Supabase Init Error:", e);
+            throw e;
         }
     },
 
-    // Sections
+    // Sections (handles adding/updating/deleting players since App.jsx sends the whole section object)
     updateSection: async (section) => {
-        const res = await fetch(`${API_BASE}/sections/${section.id}`, {
-            method: 'PUT',
-            headers: getHeaders(),
-            body: JSON.stringify(section)
-        });
-        if (!res.ok) throw new Error('Failed to update section');
-        return await res.json();
-    },
-
-    // Payments: Save to Server AND LocalStorage
-    setPayment: async (paymentData) => {
-        // 1. Save Locally Logic
         try {
-            const localStore = JSON.parse(localStorage.getItem('gaop_payments_backup') || '{}');
-            if (paymentData.isPaid) {
-                localStore[paymentData.key] = true;
-            } else {
-                delete localStore[paymentData.key];
+            // Getting existing players for this section to see what to delete
+            const { data: existingPlayers } = await supabase.from('players').select('id').eq('section_id', section.id);
+            const existingIds = existingPlayers?.map(p => p.id) || [];
+
+            const incomingIds = section.players.map(p => p.id);
+            const idsToDelete = existingIds.filter(id => !incomingIds.includes(id));
+
+            // Execute deletes
+            if (idsToDelete.length > 0) {
+                await supabase.from('players').delete().in('id', idsToDelete);
             }
-            localStorage.setItem('gaop_payments_backup', JSON.stringify(localStore));
+
+            // Execute upserts (inserts/updates)
+            const upsertPayload = section.players.map(p => ({
+                id: p.id,
+                section_id: section.id,
+                name: p.name,
+                parent: p.parentName || p.parent,
+                phone: p.phone || null,
+                price: Number(p.price || 50)
+            }));
+
+            if (upsertPayload.length > 0) {
+                const { error: upsertErr } = await supabase.from('players').upsert(upsertPayload);
+                if (upsertErr) throw upsertErr;
+            }
+
+            return section;
         } catch (e) {
-            console.error("Local Save Error", e);
+            console.error("Supabase Update Section Error:", e);
+            throw e;
         }
-
-        // 2. Save to Server
-        const res = await fetch(`${API_BASE}/payments`, {
-            method: 'POST',
-            headers: getHeaders(),
-            body: JSON.stringify(paymentData)
-        });
-        if (!res.ok) throw new Error('Failed to update payment');
-        return await res.json();
     },
 
-    // Financial Records: Add
+    // Payments
+    setPayment: async (paymentData) => {
+        try {
+            if (paymentData.isPaid) {
+                const { error } = await supabase.from('payments').upsert({
+                    key: paymentData.key,
+                    is_paid: paymentData.isPaid,
+                    athlete_name: paymentData.athleteName || 'Unknown',
+                    parent_name: paymentData.parentName || 'Unknown',
+                    department: paymentData.department || 'Unknown',
+                    amount: Number(paymentData.amount || 0),
+                    payment_date: new Date().toISOString()
+                });
+                if (error) throw error;
+            } else {
+                const { error } = await supabase.from('payments').delete().eq('key', paymentData.key);
+                if (error) throw error;
+            }
+            return { success: true };
+        } catch (e) {
+            console.error("Supabase Payment Error:", e);
+            throw e;
+        }
+    },
+
+    // Add Record
     addRecord: async (record) => {
-        const res = await fetch(`${API_BASE}/records`, {
-            method: 'POST',
-            headers: getHeaders(),
-            body: JSON.stringify(record)
-        });
-        if (!res.ok) throw new Error('Failed to add record');
-        return await res.json();
+        try {
+            const newId = Date.now().toString(); // Use timestamp as ID string
+            const payload = {
+                id: newId,
+                type: record.type,
+                category: record.category || 'admin',
+                amount: Number(record.amount || 0),
+                reason: record.reason || record.category || 'Άλλο',
+                date: record.date || new Date().toISOString()
+            };
+
+            const { error } = await supabase.from('records').insert([payload]);
+            if (error) throw error;
+
+            // App.jsx expects the ID included
+            return { ...record, id: newId };
+        } catch (e) {
+            console.error("Supabase Add Record Error:", e);
+            throw e;
+        }
     },
 
-    // Financial Records: Delete
+    // Delete Record
     deleteRecord: async (id) => {
-        const res = await fetch(`${API_BASE}/records/${id}`, {
-            method: 'DELETE',
-            headers: getHeaders()
-        });
-        if (!res.ok) throw new Error('Failed to delete record');
-        return await res.json();
+        try {
+            const { error } = await supabase.from('records').delete().eq('id', String(id));
+            if (error) throw error;
+            return { success: true };
+        } catch (e) {
+            console.error("Supabase Delete Record Error:", e);
+            throw e;
+        }
     }
 };

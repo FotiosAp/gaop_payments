@@ -7,7 +7,7 @@ import Header from '../components/Header';
 import { months, CURRENT_YEAR } from '../data/constants';
 import { ChevronLeft, ChevronRight, Phone, Trash2, Plus } from 'lucide-react';
 
-const Home = ({ role, sections, payments, totalExpected, totalCollected, totalRemaining, totalExpenses, extraIncome, onAddPlayer, onDeletePlayer, currentMonthId, setCurrentMonthId, currentYear, setCurrentYear }) => {
+const Home = ({ role, sections, payments, totalExpected, totalCollected, totalRemaining, totalExpenses, extraIncome, onAddPlayer, onDeletePlayer, onUpdateSection, currentMonthId, setCurrentMonthId, currentYear, setCurrentYear }) => {
     // console.log("Home Render Props:", { currentMonthId, currentYear, sectionsCount: sections ? sections.length : 'null' });
     const navigate = useNavigate();
     const [expandedSection, setExpandedSection] = useState(null);
@@ -106,18 +106,23 @@ const Home = ({ role, sections, payments, totalExpected, totalCollected, totalRe
         let paidAmount = 0;
         let totalAmount = 0;
 
+        const isSummerMonth = monthId === '6' || monthId === '7';
+        const skipExpected = isSummerMonth && !section.hasSummerPrep;
+
         if (section.players) {
             section.players.forEach(player => {
                 const price = Number(player.price || 0);
                 if (price > 0) {
-                    totalCount++;
-                    totalAmount += price;
+                    if (!skipExpected) {
+                        totalCount++;
+                        totalAmount += price;
+                    }
 
                     // Updated key format: YEAR_MONTH_PLAYERID
                     const paymentKey = `${currentYear}_${monthId}_${player.id}`;
                     const isPaid = payments && payments[paymentKey];
 
-                    if (isPaid) {
+                    if (isPaid === true || (isPaid && isPaid.isPaid)) {
                         paidCount++;
                         paidAmount += price;
                     }
@@ -127,31 +132,60 @@ const Home = ({ role, sections, payments, totalExpected, totalCollected, totalRe
         return { paidCount, totalCount, paidAmount, totalAmount };
     };
 
-    // Sort sections: "Junior" appears first, then others alphabetically or by default order
-    const sortedSections = [...(sections || [])].sort((a, b) => {
-        const titleA = (a.title || '').toLowerCase();
-        const titleB = (b.title || '').toLowerCase();
+    // Calculate unpaid months for a player up to the current selected month within the current season
+    const getPlayerDebtStatus = (player, section) => {
+        if (!player || !player.price || Number(player.price) === 0) return null;
+        let unpaidCount = 0;
+        const currentM = parseInt(currentMonthId);
 
-        // Helper to check for keywords (Greek/English coverage)
-        const has = (t, ...words) => words.every(w => t.includes(w));
+        if (isNaN(currentM)) return null;
 
-        const getPriority = (t) => {
-            if (t.includes('junior')) return 1;
-            // "Under 12" logic (Boys first, then Girls)
-            if (has(t, '12') && (has(t, 'αγόρια') || has(t, 'boys'))) return 2;
-            if (has(t, '12') && (has(t, 'κορίτσια') || has(t, 'girls'))) return 3;
-            // "Under 14" logic
-            if (has(t, '14') && (has(t, 'αγόρια') || has(t, 'boys'))) return 4;
+        // Season months sequence starting from September (8) to August (7)
+        const seasonMonths = [8, 9, 10, 11, 0, 1, 2, 3, 4, 5, 6, 7];
+        const currentMonthIndex = seasonMonths.indexOf(currentM);
 
-            return 100; // Others come last
-        };
+        // If current month is Jan-Aug (0-7), the season started in previous year
+        // If current month is Sep-Dec (8-11), the season started in current year
+        const seasonStartYear = currentM >= 8 ? currentYear : currentYear - 1;
 
-        const pA = getPriority(titleA);
-        const pB = getPriority(titleB);
+        for (let i = 0; i <= currentMonthIndex; i++) {
+            const m = seasonMonths[i];
+            const yearForMonth = m >= 8 ? seasonStartYear : seasonStartYear + 1;
 
-        if (pA !== pB) return pA - pB;
-        return 0; // Maintain original order for others
-    });
+            // Skip July (6) and August (7) unless the section explicitly has summer prep
+            // Or if we define a property 'hasSummerPrep' on the section.
+            // For now, let's assume if hasSummerPrep is true, we count them. Otherwise skip.
+            if ((m === 6 || m === 7) && (!section || !section.hasSummerPrep)) {
+                continue;
+            }
+
+            const key = `${yearForMonth}_${m}_${player.id}`;
+            const pmt = payments && payments[key];
+            const isPaid = pmt === true || (pmt && pmt.isPaid);
+            if (!isPaid) {
+                unpaidCount++;
+            }
+        }
+
+        if (unpaidCount > 0) {
+            return {
+                status: 'debt',
+                text: `${unpaidCount} ${unpaidCount === 1 ? 'μήνας' : 'μήνες'}`,
+                color: '#D32F2F', // Red text
+                bgColor: '#FFEBEE' // Light red background
+            };
+        } else {
+            return {
+                status: 'paid',
+                text: 'Εξοφλημένος',
+                color: '#2E7D32', // Green text
+                bgColor: '#E8F5E9' // Light green background
+            };
+        }
+    };
+
+    // Sections are already sorted in the correct API order
+    const sortedSections = sections || [];
 
     return (
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px', fontFamily: '"Segoe UI", sans-serif' }}>
@@ -250,10 +284,48 @@ const Home = ({ role, sections, payments, totalExpected, totalCollected, totalRe
                             {/* Expanded Player List */}
                             {isExpanded && (
                                 <div className="player-list-container">
+                                    {(currentMonthId === '6' || currentMonthId === '7') && (
+                                        <div style={{ padding: '12px 16px', borderBottom: '1px solid #eee', display: 'flex', alignItems: 'center', gap: '10px', backgroundColor: '#fff9e6' }}>
+                                            <input
+                                                type="checkbox"
+                                                id={`summer-prep-${section.id}`}
+                                                checked={!!section.hasSummerPrep}
+                                                onChange={(e) => {
+                                                    if (onUpdateSection) {
+                                                        onUpdateSection({ ...section, hasSummerPrep: e.target.checked });
+                                                    }
+                                                }}
+                                                style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                                            />
+                                            <label htmlFor={`summer-prep-${section.id}`} style={{ fontWeight: '600', color: '#B7791F', cursor: 'pointer', margin: 0 }}>
+                                                Το τμήμα κάνει Θερινή Προετοιμασία
+                                            </label>
+                                        </div>
+                                    )}
+
                                     {section.players && section.players.map(player => (
                                         <div key={player.id} className="player-row roster-row">
                                             <div className="player-info">
-                                                <span className="player-name">{player.name}</span>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '4px' }}>
+                                                    <span className="player-name">{player.name}</span>
+                                                    {(() => {
+                                                        const debtStats = getPlayerDebtStatus(player, section);
+                                                        if (!debtStats) return null;
+                                                        return (
+                                                            <span style={{
+                                                                fontSize: '0.75rem',
+                                                                fontWeight: '700',
+                                                                padding: '2px 8px',
+                                                                borderRadius: '12px',
+                                                                color: debtStats.color,
+                                                                background: debtStats.bgColor,
+                                                                display: 'inline-block'
+                                                            }}>
+                                                                {debtStats.status === 'debt' ? `Οφείλει ${debtStats.text}` : 'Εξοφλημένος'}
+                                                            </span>
+                                                        );
+                                                    })()}
+                                                </div>
                                                 <span className="parent-name">Γονιός: {player.parent}</span>
                                                 {player.phone && (
                                                     <div style={{ position: 'relative', display: 'inline-block', marginTop: '4px' }}>

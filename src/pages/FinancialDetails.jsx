@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Plus, Minus, Trash2, Calendar } from 'lucide-react';
 import { months } from '../data/constants';
 
 const FinancialDetails = ({ records, onAddRecord, onDeleteRecord, currentYear, sections, payments, totalAnnualSubscriptionIncome }) => {
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // Default to 'admin' if accessed without state
+    const currentCategory = location.state?.category || 'admin';
+
     const [selectedMonthId, setSelectedMonthId] = useState(null);
 
     // Scroll to Top on Mount
@@ -23,11 +28,18 @@ const FinancialDetails = ({ records, onAddRecord, onDeleteRecord, currentYear, s
     const [incomeAmount, setIncomeAmount] = useState('');
     const [incomeReason, setIncomeReason] = useState('');
 
+    // Filter records for the selected month AND the selected category
     const currentRecords = selectedMonthId !== null ? records.filter(r => {
         const d = new Date(r.date);
+
+        // Income is always visible in Admin mode, or if we want to separate Income we can check r.category
+        // For Expenses, only show those matching the current category
+        const isMatchCategory = r.type === 'income' ? (currentCategory === 'admin') : (r.category === currentCategory || (!r.category && currentCategory === 'admin'));
+
         return d.getMonth() === Number(selectedMonthId) &&
             d.getFullYear() === currentYear &&
-            r.category !== 'subscription'; // Exclude subscription expenses from this view
+            r.category !== 'subscription' && // Old subscription category
+            isMatchCategory;
     }) : [];
 
     // Calculate Subscription Income and Count for Selected Month
@@ -61,6 +73,7 @@ const FinancialDetails = ({ records, onAddRecord, onDeleteRecord, currentYear, s
 
         onAddRecord({
             type: 'expense',
+            category: currentCategory,
             amount: Number(expenseAmount),
             reason: expenseReason,
             date: date
@@ -78,6 +91,7 @@ const FinancialDetails = ({ records, onAddRecord, onDeleteRecord, currentYear, s
 
         onAddRecord({
             type: 'income',
+            category: currentCategory,
             amount: Number(incomeAmount),
             reason: incomeReason,
             date: date
@@ -160,7 +174,7 @@ const FinancialDetails = ({ records, onAddRecord, onDeleteRecord, currentYear, s
                         <ArrowLeft size={20} color="#333" />
                     </button>
                     <h1 className="section-title" style={{ margin: 0, fontSize: '1.2rem' }}>
-                        Οικονομική Επισκόπηση {currentYear}
+                        Οικονομική Επισκόπηση {currentCategory === 'trainer' ? 'Προπονητών' : 'Διοίκησης'} {currentYear}
                     </h1>
                 </div>
 
@@ -555,66 +569,68 @@ const FinancialDetails = ({ records, onAddRecord, onDeleteRecord, currentYear, s
 
             </div>
 
-            {/* Section Breakdown Card */}
-            <div className="card-glass" style={{ padding: '24px', borderRadius: '16px', marginBottom: '32px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
-                <h3 style={{ marginTop: 0, marginBottom: '20px', fontSize: '1.2rem', color: '#1e293b', fontWeight: '700' }}>
-                    Ανάλυση Εσόδων ανά Τμήμα (20%)
-                </h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '16px' }}>
-                    {sections && sections.map(section => {
-                        let sectionTotal = 0;
-                        if (section.players) {
-                            section.players.forEach(player => {
-                                const paymentKey = `${currentYear}_${selectedMonthId}_${player.id}`;
-                                const pmt = payments[paymentKey];
-                                if (pmt === true || (pmt && pmt.isPaid)) {
-                                    const amount = (typeof pmt === 'object' && pmt.amount !== undefined) ? Number(pmt.amount) : Number(player.price || 0);
-                                    sectionTotal += amount;
-                                }
+            {/* Section Breakdown Card (Only show for Trainer/Subscriptions) */}
+            {currentCategory === 'trainer' && (
+                <div className="card-glass" style={{ padding: '24px', borderRadius: '16px', marginBottom: '32px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
+                    <h3 style={{ marginTop: 0, marginBottom: '20px', fontSize: '1.2rem', color: '#1e293b', fontWeight: '700' }}>
+                        Ανάλυση Εσόδων ανά Τμήμα (20%)
+                    </h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '16px' }}>
+                        {sections && sections.map(section => {
+                            let sectionTotal = 0;
+                            if (section.players) {
+                                section.players.forEach(player => {
+                                    const paymentKey = `${currentYear}_${selectedMonthId}_${player.id}`;
+                                    const pmt = payments[paymentKey];
+                                    if (pmt === true || (pmt && pmt.isPaid)) {
+                                        const amount = (typeof pmt === 'object' && pmt.amount !== undefined) ? Number(pmt.amount) : Number(player.price || 0);
+                                        sectionTotal += amount;
+                                    }
+                                });
+                            }
+
+                            if (sectionTotal === 0) return null;
+
+                            const clubShare = sectionTotal * 0.2;
+
+                            return (
+                                <div key={section.id} style={{
+                                    padding: '16px',
+                                    borderRadius: '12px',
+                                    background: '#F8FAFC',
+                                    border: '1px solid #E2E8F0',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center'
+                                }}>
+                                    <div>
+                                        <div style={{ fontWeight: '600', color: '#334155' }}>{section.title}</div>
+                                        <div style={{ fontSize: '0.85rem', color: '#64748B' }}>Σύνολο: {sectionTotal.toLocaleString('el-GR')}€</div>
+                                    </div>
+                                    <div style={{ fontWeight: '700', color: '#15803d', fontSize: '1.1rem' }}>
+                                        +{clubShare.toLocaleString('el-GR')}€
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    {(!sections || sections.every(s => {
+                        let t = 0;
+                        if (s.players) {
+                            s.players.forEach(p => {
+                                const k = `${currentYear}_${selectedMonthId}_${p.id}`;
+                                const v = payments[k];
+                                if (v === true || (v && v.isPaid)) t++;
                             });
                         }
-
-                        if (sectionTotal === 0) return null;
-
-                        const clubShare = sectionTotal * 0.2;
-
-                        return (
-                            <div key={section.id} style={{
-                                padding: '16px',
-                                borderRadius: '12px',
-                                background: '#F8FAFC',
-                                border: '1px solid #E2E8F0',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center'
-                            }}>
-                                <div>
-                                    <div style={{ fontWeight: '600', color: '#334155' }}>{section.title}</div>
-                                    <div style={{ fontSize: '0.85rem', color: '#64748B' }}>Σύνολο: {sectionTotal.toLocaleString('el-GR')}€</div>
-                                </div>
-                                <div style={{ fontWeight: '700', color: '#15803d', fontSize: '1.1rem' }}>
-                                    +{clubShare.toLocaleString('el-GR')}€
-                                </div>
+                        return t === 0;
+                    })) && (
+                            <div style={{ textAlign: 'center', color: '#94a3b8', fontStyle: 'italic', padding: '10px' }}>
+                                Δεν υπάρχουν εισπράξεις συνδρομών για αυτόν τον μήνα.
                             </div>
-                        );
-                    })}
+                        )}
                 </div>
-                {(!sections || sections.every(s => {
-                    let t = 0;
-                    if (s.players) {
-                        s.players.forEach(p => {
-                            const k = `${currentYear}_${selectedMonthId}_${p.id}`;
-                            const v = payments[k];
-                            if (v === true || (v && v.isPaid)) t++;
-                        });
-                    }
-                    return t === 0;
-                })) && (
-                        <div style={{ textAlign: 'center', color: '#94a3b8', fontStyle: 'italic', padding: '10px' }}>
-                            Δεν υπάρχουν εισπράξεις συνδρομών για αυτόν τον μήνα.
-                        </div>
-                    )}
-            </div>
+            )}
 
             {/* Recent Transactions List & Summary */}
             <div className="card-glass" style={{ padding: '24px', borderRadius: '16px', marginBottom: '40px' }}>

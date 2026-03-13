@@ -232,8 +232,14 @@
   ],
   "users": [
     {
-      "username": "admin",
-      "password": "$2a$10$YourHashedPasswordHereOrPlaintextIfWeAreLazyButLetsBeSafe"
+      "username": "Gaop",
+      "password": "$2b$10$SqY55KysiWQaohPwGKABBOhkIXgQY8mMNZGHH9MtqwLl1whRkBplu",
+      "role": "admin"
+    },
+    {
+      "username": "GaopAdmin2021!",
+      "password": "$2b$10$VGM2RqUOOL8aXzW7JB8DbuUJPwYwTbWszuMBfh8ILzeqn.vBi035C",
+      "role": "manager"
     }
   ]
 }

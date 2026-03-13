@@ -101,7 +101,7 @@ const Dashboard = ({ totalExpected, totalCollected, totalRemaining, totalExpense
 
                 <div style={{ marginTop: '20px', marginBottom: '10px', width: '100%', display: 'flex', justifyContent: 'center' }}>
                     <button
-                        onClick={() => navigate('/subscription-analysis')}
+                        onClick={() => navigate('/subscription-analysis', { state: { category: 'trainer' } })}
                         style={{
                             background: '#1976D2', // Blue
                             border: 'none',
@@ -160,7 +160,7 @@ const Dashboard = ({ totalExpected, totalCollected, totalRemaining, totalExpense
 
                 <div style={{ marginTop: '20px', marginBottom: '10px', width: '100%', display: 'flex', justifyContent: 'center' }}>
                     <button
-                        onClick={() => navigate('/financial-analysis')}
+                        onClick={() => navigate('/financial-analysis', { state: { category: 'admin' } })}
                         style={{
                             background: '#1976D2', // Blue
                             border: 'none',

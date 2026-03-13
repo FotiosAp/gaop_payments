@@ -1,10 +1,14 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, PieChart, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 import { months } from '../data/constants';
 
 const AnnualFinancialReport = ({ records, currentYear, payments, sections }) => {
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // Default to 'admin' if accessed without state
+    const currentCategory = location.state?.category || 'admin';
 
     // Calculate Annual Stats
     const yearRecords = records.filter(r => {
@@ -12,19 +16,23 @@ const AnnualFinancialReport = ({ records, currentYear, payments, sections }) => 
         return d.getFullYear() === currentYear;
     });
 
+    // Expenses: based on category
+    // Admin sees generic expenses or 'admin' expenses (excluding subscription).
+    // Trainer sees 'trainer' expenses.
     const totalManualExpenses = yearRecords
-        .filter(r => r.type === 'expense' && r.category !== 'subscription')
+        .filter(r => r.type === 'expense' && r.category !== 'subscription' && (currentCategory === 'admin' ? (!r.category || r.category === 'admin') : r.category === currentCategory))
         .reduce((sum, r) => sum + Number(r.amount), 0);
 
-    const totalManualIncome = yearRecords
-        .filter(r => r.type === 'income')
-        .reduce((sum, r) => sum + Number(r.amount), 0);
+    // Income:
+    // Admin sees manual typical income.
+    const totalManualIncome = currentCategory === 'admin' ? yearRecords
+        .filter(r => r.type === 'income' && (!r.category || r.category === 'admin'))
+        .reduce((sum, r) => sum + Number(r.amount), 0) : 0;
 
-    // Calculate Subscription Income (collected) for the whole year
-    // Calculate Subscription Income (collected) for the whole year
+    // Calculate Subscription Income (collected) for the whole year (20% share for Admin)
     let totalSubscriptionIncome = 0;
 
-    if (sections && payments) {
+    if (currentCategory === 'admin' && sections && payments) {
         // Iterate through all 12 months
         for (let monthId = 0; monthId < 12; monthId++) {
             sections.forEach(section => {
@@ -56,7 +64,7 @@ const AnnualFinancialReport = ({ records, currentYear, payments, sections }) => 
                 marginBottom: '24px'
             }}>
                 <button
-                    onClick={() => navigate('/financial-analysis')}
+                    onClick={() => navigate('/financial-analysis', { state: { category: currentCategory } })}
                     style={{
                         background: 'white',
                         border: 'none',
@@ -74,7 +82,7 @@ const AnnualFinancialReport = ({ records, currentYear, payments, sections }) => 
                 </button>
                 <div style={{ flex: 1 }}>
                     <h1 className="section-title" style={{ margin: 0, fontSize: '1.2rem' }}>
-                        Οικονομικός Απολογισμός {currentYear}
+                        Οικονομικός Απολογισμός {currentCategory === 'trainer' ? 'Προπονητών' : 'Διοίκησης'} {currentYear}
                     </h1>
                 </div>
             </div>
@@ -131,66 +139,70 @@ const AnnualFinancialReport = ({ records, currentYear, payments, sections }) => 
                 </div>
             </div>
 
-            {/* Annual Section Breakdown */}
-            <div className="card-glass" style={{ padding: '24px', borderRadius: '20px', marginBottom: '24px' }}>
-                <h3 style={{ marginTop: 0, marginBottom: '20px', color: '#333' }}>Ετήσια Ανάλυση ανά Τμήμα (20%)</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
-                    {sections && sections.map(section => {
-                        let annualSectionTotal = 0;
-                        // Iterate all months for this section
-                        for (let m = 0; m < 12; m++) {
-                            if (section.players) {
-                                section.players.forEach(player => {
-                                    const paymentKey = `${currentYear}_${m}_${player.id}`;
-                                    const pmt = payments[paymentKey];
-                                    if (pmt === true || (pmt && pmt.isPaid)) {
-                                        const amount = (typeof pmt === 'object' && pmt.amount !== undefined) ? Number(pmt.amount) : Number(player.price || 0);
-                                        annualSectionTotal += amount;
-                                    }
-                                });
+            {/* Annual Section Breakdown (Admin Only) */}
+            {currentCategory === 'admin' && (
+                <div className="card-glass" style={{ padding: '24px', borderRadius: '20px', marginBottom: '24px' }}>
+                    <h3 style={{ marginTop: 0, marginBottom: '20px', color: '#333' }}>Ετήσια Ανάλυση ανά Τμήμα (20%)</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
+                        {sections && sections.map(section => {
+                            let annualSectionTotal = 0;
+                            // Iterate all months for this section
+                            for (let m = 0; m < 12; m++) {
+                                if (section.players) {
+                                    section.players.forEach(player => {
+                                        const paymentKey = `${currentYear}_${m}_${player.id}`;
+                                        const pmt = payments[paymentKey];
+                                        if (pmt === true || (pmt && pmt.isPaid)) {
+                                            const amount = (typeof pmt === 'object' && pmt.amount !== undefined) ? Number(pmt.amount) : Number(player.price || 0);
+                                            annualSectionTotal += amount;
+                                        }
+                                    });
+                                }
                             }
-                        }
 
-                        if (annualSectionTotal === 0) return null;
-                        const clubShare = annualSectionTotal * 0.2;
+                            if (annualSectionTotal === 0) return null;
+                            const clubShare = annualSectionTotal * 0.2;
 
-                        return (
-                            <div key={section.id} style={{
-                                padding: '16px',
-                                borderRadius: '12px',
-                                background: '#F8FAFC',
-                                borderLeft: '4px solid #10B981',
-                                boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
-                            }}>
-                                <div style={{ fontSize: '1rem', fontWeight: '600', color: '#1E293B', marginBottom: '8px' }}>
-                                    {section.title}
+                            return (
+                                <div key={section.id} style={{
+                                    padding: '16px',
+                                    borderRadius: '12px',
+                                    background: '#F8FAFC',
+                                    borderLeft: '4px solid #10B981',
+                                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                                }}>
+                                    <div style={{ fontSize: '1rem', fontWeight: '600', color: '#1E293B', marginBottom: '8px' }}>
+                                        {section.title}
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.9rem' }}>
+                                        <span style={{ color: '#64748B' }}>Εισπράξεις:</span>
+                                        <span style={{ fontWeight: '600', color: '#334155' }}>{annualSectionTotal.toLocaleString('el-GR')}€</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px', paddingTop: '4px', borderTop: '1px dashed #E2E8F0' }}>
+                                        <span style={{ color: '#15803d', fontWeight: '600' }}>Ταμείο (20%):</span>
+                                        <span style={{ fontWeight: '800', color: '#15803d', fontSize: '1.1rem' }}>+{clubShare.toLocaleString('el-GR')}€</span>
+                                    </div>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.9rem' }}>
-                                    <span style={{ color: '#64748B' }}>Εισπράξεις:</span>
-                                    <span style={{ fontWeight: '600', color: '#334155' }}>{annualSectionTotal.toLocaleString('el-GR')}€</span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px', paddingTop: '4px', borderTop: '1px dashed #E2E8F0' }}>
-                                    <span style={{ color: '#15803d', fontWeight: '600' }}>Ταμείο (20%):</span>
-                                    <span style={{ fontWeight: '800', color: '#15803d', fontSize: '1.1rem' }}>+{clubShare.toLocaleString('el-GR')}€</span>
-                                </div>
-                            </div>
-                        );
-                    })}
+                            );
+                        })}
+                    </div>
                 </div>
-            </div>
+            )}
 
-            {/* Breakdown Details */}
-            <div className="card-glass" style={{ padding: '24px', borderRadius: '20px' }}>
-                <h3 style={{ marginTop: 0, marginBottom: '20px', color: '#333' }}>Ανάλυση Εσόδων</h3>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
-                    <span style={{ color: '#64748B' }}>Συνδρομές</span>
-                    <span style={{ fontWeight: 'bold' }}>{Number(totalSubscriptionIncome).toLocaleString('el-GR')}€</span>
+            {/* Breakdown Details (Admin Only) */}
+            {currentCategory === 'admin' && (
+                <div className="card-glass" style={{ padding: '24px', borderRadius: '20px' }}>
+                    <h3 style={{ marginTop: 0, marginBottom: '20px', color: '#333' }}>Ανάλυση Εσόδων</h3>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
+                        <span style={{ color: '#64748B' }}>Συνδρομές (20%)</span>
+                        <span style={{ fontWeight: 'bold' }}>{Number(totalSubscriptionIncome).toLocaleString('el-GR')}€</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ color: '#64748B' }}>Άλλα (Χορηγίες κ.λπ.)</span>
+                        <span style={{ fontWeight: 'bold' }}>{Number(totalManualIncome).toLocaleString('el-GR')}€</span>
+                    </div>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: '#64748B' }}>Άλλα (Χορηγίες κ.λπ.)</span>
-                    <span style={{ fontWeight: 'bold' }}>{Number(totalManualIncome).toLocaleString('el-GR')}€</span>
-                </div>
-            </div>
+            )}
 
             {/* Expenses Breakdown */}
             <div className="card-glass" style={{ padding: '24px', borderRadius: '20px', marginTop: '20px' }}>

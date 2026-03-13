@@ -91,6 +91,12 @@ function App() {
       .catch(e => console.error("Add failed", e));
   };
 
+  const handleUpdateSection = (updatedSection) => {
+    api.updateSection(updatedSection)
+      .then(() => updateSectionState(updatedSection))
+      .catch(e => console.error("Update section failed", e));
+  };
+
   const handleDeletePlayer = (sectionId, playerId) => {
     const section = sections.find(s => s.id === sectionId);
     if (!section) return;
@@ -125,8 +131,8 @@ function App() {
       .catch(e => console.error(e));
   };
 
-  const handleSetPayment = (monthId, playerId, status) => {
-    const key = `${currentYear}_${monthId}_${playerId}`;
+  const handleSetPayment = (monthId, targetYear, playerId, status) => {
+    const key = `${targetYear}_${monthId}_${playerId}`;
 
     // Calculate Amount (Default to Price if not in DB yet)
     let amountToSave = 0;
@@ -189,7 +195,10 @@ function App() {
 
               if (price > 0 && p.id) {
                 // Expected for THIS month
-                expected += price;
+                const isSummerMonth = currentMonthId === '6' || currentMonthId === '7';
+                if (!(isSummerMonth && !s.hasSummerPrep)) {
+                  expected += price;
+                }
 
                 // Collected for THIS month
                 const key = `${currentYear}_${currentMonthId}_${p.id}`;
@@ -289,6 +298,7 @@ function App() {
                 setCurrentYear={setCurrentYear}
                 onAddPlayer={handleAddPlayer}
                 onDeletePlayer={handleDeletePlayer}
+                onUpdateSection={handleUpdateSection}
               />
             </ProtectedRoute>
           } />
@@ -311,9 +321,21 @@ function App() {
             </ProtectedRoute>
           } />
 
+          <Route path="/month/:monthId/year/:year/section/:id" element={
+            <ProtectedRoute>
+              <SectionDetail
+                sections={enrichedSections}
+                payments={payments}
+                currentYear={currentYear}
+                onSetPayment={handleSetPayment}
+                onUpdatePlayer={handleUpdatePlayer}
+              />
+            </ProtectedRoute>
+          } />
+
           <Route path="/department/:sectionId/months" element={
             <ProtectedRoute>
-              <DepartmentMonths sections={enrichedSections} payments={payments} currentYear={currentYear} />
+              <DepartmentMonths sections={enrichedSections} payments={payments} currentYear={currentYear} currentMonthId={currentMonthId} />
             </ProtectedRoute>
           } />
 

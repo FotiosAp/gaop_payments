@@ -102,7 +102,7 @@ const MonthView = ({ sections, payments, currentYear }) => {
                         <button
                             key={section.id}
                             className="dept-btn"
-                            onClick={() => navigate(`/month/${monthId}/section/${section.id}`)}
+                            onClick={() => navigate(`/month/${monthId}/year/${currentYear}/section/${section.id}`)}
                             style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}
                         >
                             <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
