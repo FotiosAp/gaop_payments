@@ -201,14 +201,31 @@ const Home = ({ role, sections, payments, totalExpected, totalCollected, totalRe
     // Sections are already sorted in the correct API order
     const sortedSections = sections || [];
 
+    // Calculate total active athletes across all sections
+    const totalAthletes = sortedSections.reduce((sum, section) => sum + (section.players ? section.players.length : 0), 0);
+
+    // Calculate global payment stats for the current month
+    const globalStats = sortedSections.reduce((acc, section) => {
+        const stats = getSectionStats(section, currentMonthId);
+        acc.paidCount += stats.paidCount;
+        acc.totalCount += stats.totalCount;
+        return acc;
+    }, { paidCount: 0, totalCount: 0 });
+
     return (
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px', fontFamily: '"Segoe UI", sans-serif' }}>
             <Header />
             <header>
                 <div className="header-brand">
-                    <img src="/logo.png" alt="GAOP Logo" className="logo" />
-                    <div className="header-titles">
-                        <h1>Γ.Α.Ο. ΠΕΙΡΑΙΑ<span>ΤΜΗΜΑ ΚΑΛΑΘΟΣΦΑΙΡΙΣΗΣ</span></h1>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1 }}>
+                        <img src="/logo.png" alt="GAOP Logo" className="logo" />
+                        <div className="header-titles">
+                            <h1>Γ.Α.Ο. ΠΕΙΡΑΙΑ<span>ΤΜΗΜΑ ΚΑΛΑΘΟΣΦΑΙΡΙΣΗΣ</span></h1>
+                        </div>
+                    </div>
+                    <div className="athlete-badge">
+                        <span className="badge-label">Ενεργοί Αθλητές</span>
+                        <span className="badge-value">{totalAthletes}</span>
                     </div>
                 </div>
             </header>
@@ -250,7 +267,14 @@ const Home = ({ role, sections, payments, totalExpected, totalCollected, totalRe
             */}
 
             {/* Roster Management Section */}
-            <h2 className="section-h2">Συνδρομές</h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                <h2 className="section-h2" style={{ margin: 0 }}>Συνδρομές</h2>
+                <div className="payment-summary-badge">
+                    <span className="summary-value">{globalStats.paidCount}</span>
+                    <span className="summary-separator">/</span>
+                    <span className="summary-total">{globalStats.totalCount}</span>
+                </div>
+            </div>
             <div style={{ marginBottom: '32px' }}>
                 {sortedSections.map(section => {
                     const checkCount = section.players ? section.players.length : 0;

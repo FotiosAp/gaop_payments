@@ -73,6 +73,8 @@ header {
   display: flex;
   align-items: center;
   gap: 16px;
+  flex: 1;
+  justify-content: space-between;
 }
 
 .logo {
@@ -100,6 +102,56 @@ header h1 span {
   letter-spacing: 0.5px;
   margin-top: 2px;
 }
+
+/* Athlete Badge */
+.athlete-badge {
+  background: #ECFDF5;
+  border: 1px solid #A7F3D0;
+  padding: 8px 16px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 100px;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.athlete-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(16, 185, 129, 0.15);
+}
+
+.badge-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #059669;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+
+.badge-value {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #065F46;
+  line-height: 1;
+}
+
+@media (max-width: 480px) {
+  .athlete-badge {
+    padding: 6px 12px;
+    min-width: 80px;
+  }
+  .badge-label {
+    font-size: 0.6rem;
+  }
+  .badge-value {
+    font-size: 1.2rem;
+  }
+}
+
 
 /* Navigation Bar */
 .month-nav {
@@ -825,4 +877,34 @@ header h1 span {
     display: flex;
     align-items: center;
   }
+}
+
+/* Payment Summary Badge */
+.payment-summary-badge {
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  padding: 4px 14px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: inherit;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
+}
+
+.summary-value {
+  font-weight: 800;
+  color: #1E40AF;
+  font-size: 1.1rem;
+}
+
+.summary-separator {
+  color: #60A5FA;
+  font-weight: 400;
+}
+
+.summary-total {
+  color: #3B82F6;
+  font-weight: 600;
+  font-size: 0.9rem;
 }
