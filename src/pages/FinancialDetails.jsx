@@ -410,18 +410,18 @@ const FinancialDetails = ({ records, onAddRecord, onDeleteRecord, currentYear, s
             {/* Forms Container with Responsive Grid */}
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                gap: '24px',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                gap: '20px',
                 marginBottom: '32px'
             }}>
 
                 {/* Add Expense Form */}
-                <div className="card-glass" style={{ padding: '24px', borderRadius: '20px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px', color: '#D32F2F' }}>
-                        <div style={{ background: '#FFEBEE', padding: '8px', borderRadius: '50%' }}>
+                <div className="card-glass" style={{ padding: '20px', borderRadius: '16px', boxShadow: 'var(--shadow-md)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', color: '#B91C1C' }}>
+                        <div style={{ background: '#FEE2E2', padding: '8px', borderRadius: '50%' }}>
                             <Minus size={20} />
                         </div>
-                        <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '700' }}>Εισαγωγή Εξόδων</h2>
+                        <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700' }}>Εισαγωγή Εξόδων</h2>
                     </div>
                     <form onSubmit={handleAddExpense} style={{ display: 'grid', gap: '16px' }}>
                         <div>
@@ -492,12 +492,12 @@ const FinancialDetails = ({ records, onAddRecord, onDeleteRecord, currentYear, s
                 </div>
 
                 {/* Add Income Form */}
-                <div className="card-glass" style={{ padding: '24px', borderRadius: '20px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px', color: '#2E7D32' }}>
-                        <div style={{ background: '#E8F5E9', padding: '8px', borderRadius: '50%' }}>
+                <div className="card-glass" style={{ padding: '20px', borderRadius: '16px', boxShadow: 'var(--shadow-md)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', color: '#166534' }}>
+                        <div style={{ background: '#DCFCE7', padding: '8px', borderRadius: '50%' }}>
                             <Plus size={20} />
                         </div>
-                        <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '700' }}>Εισαγωγή Εσόδων</h2>
+                        <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700' }}>Εισαγωγή Εσόδων</h2>
                     </div>
                     <form onSubmit={handleAddIncome} style={{ display: 'grid', gap: '16px' }}>
                         <div>
@@ -700,8 +700,8 @@ const FinancialDetails = ({ records, onAddRecord, onDeleteRecord, currentYear, s
                 }}>
                     <div style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                        gap: '32px'
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                        gap: '20px'
                     }}>
                         {/* Income Section */}
                         <div style={{ background: '#F0FDF4', padding: '16px', borderRadius: '12px', border: '1px solid #DCFCE7' }}>
@@ -709,7 +709,7 @@ const FinancialDetails = ({ records, onAddRecord, onDeleteRecord, currentYear, s
                                 Ανάλυση Εσόδων
                             </h4>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.9rem', color: '#15803d' }}>
-                                <span>Από Συνδρομές ({subscriptionCount}) - (20%):</span>
+                                <span>Από Συνδρομές κλπ:</span>
                                 <span>{subscriptionIncome.toLocaleString('el-GR')}€</span>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.9rem', color: '#15803d' }}>
@@ -743,8 +743,8 @@ const FinancialDetails = ({ records, onAddRecord, onDeleteRecord, currentYear, s
                             <div style={{
                                 display: 'flex',
                                 justifyContent: 'space-between',
-                                marginTop: 'auto',
-                                paddingTop: '36px', // Push to match height roughly or just spaced
+                                marginTop: '12px',
+                                paddingTop: '8px',
                                 borderTop: '1px dashed #FCA5A5',
                                 fontWeight: '700',
                                 color: '#7F1D1D',
@@ -758,23 +758,23 @@ const FinancialDetails = ({ records, onAddRecord, onDeleteRecord, currentYear, s
                         {/* Net Result Section */}
                         <div style={{
                             background: '#F8FAFC',
-                            padding: '16px',
+                            padding: '20px',
                             borderRadius: '12px',
                             border: '1px solid #E2E8F0',
                             display: 'flex',
                             flexDirection: 'column',
                             justifyContent: 'center',
                             alignItems: 'center',
-                            textAlign: 'center'
+                            textAlign: 'center',
+                            gridColumn: '1 / -1'
                         }}>
                             <div style={{ fontSize: '1rem', color: '#64748B', marginBottom: '8px', fontWeight: '600' }}>
                                 Τελικό Υπόλοιπο Μήνα
                             </div>
                             <div style={{
-                                fontSize: '2rem',
+                                fontSize: '2.2rem',
                                 fontWeight: '900',
-                                color: balance >= 0 ? '#166534' : '#DC2626',
-                                textShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                                color: balance >= 0 ? '#166534' : '#DC2626'
                             }}>
                                 {balance > 0 ? '+' : ''}{balance.toLocaleString('el-GR')}€
                             </div>

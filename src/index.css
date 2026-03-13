@@ -651,7 +651,16 @@ header h1 span {
 /* RESPONSIVE & MOBILE OPTIMIZATIONS */
 @media (max-width: 768px) {
   .app-container {
-    padding: 12px;
+    padding: 16px 12px;
+  }
+
+  /* Prevent automatic zoom on iOS Safari when focusing inputs */
+  input[type="text"],
+  input[type="number"],
+  input[type="password"],
+  select,
+  textarea {
+    font-size: 16px !important;
   }
 
   /* Sticky Summary Header */

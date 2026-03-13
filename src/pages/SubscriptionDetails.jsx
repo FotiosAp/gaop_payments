@@ -296,20 +296,19 @@ const SubscriptionDetails = ({ sections = [], payments = {}, currentYear, record
                 </div>
 
                 {/* Add Expense Form */}
-                <div style={{
-                    background: 'white',
+                <div className="card-glass" style={{
                     borderRadius: '16px',
                     padding: '24px',
                     marginBottom: '32px',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                    boxShadow: 'var(--shadow-md)'
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px', color: '#D32F2F' }}>
-                        <div style={{ background: '#FFEBEE', padding: '8px', borderRadius: '50%' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px', color: '#B91C1C' }}>
+                        <div style={{ background: '#FEE2E2', padding: '8px', borderRadius: '50%' }}>
                             <Minus size={20} />
                         </div>
-                        <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '700' }}>Εισαγωγή Εξόδων (Από Συνδρομές)</h2>
+                        <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '700' }}>Εισαγωγή Εξόδων (Από Συνδρομές)</h2>
                     </div>
-                    <form onSubmit={initiateAddExpense} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', alignItems: 'end' }}>
+                    <form onSubmit={initiateAddExpense} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', alignItems: 'end' }}>
                         <div>
                             <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', color: '#64748B', fontWeight: '600' }}>Ποσό (€)</label>
                             <input
@@ -317,7 +316,14 @@ const SubscriptionDetails = ({ sections = [], payments = {}, currentYear, record
                                 value={expenseAmount}
                                 onChange={(e) => setExpenseAmount(e.target.value)}
                                 placeholder="0"
-                                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ccc' }}
+                                style={{
+                                    width: '100%',
+                                    padding: '12px 16px',
+                                    borderRadius: '12px',
+                                    border: '1px solid #E2E8F0',
+                                    background: '#F8FAFC',
+                                    outline: 'none'
+                                }}
                                 required
                             />
                         </div>
@@ -328,23 +334,32 @@ const SubscriptionDetails = ({ sections = [], payments = {}, currentYear, record
                                 value={expenseReason}
                                 onChange={(e) => setExpenseReason(e.target.value)}
                                 placeholder="π.χ. Πληρωμή Προπονητή"
-                                style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ccc' }}
+                                style={{
+                                    width: '100%',
+                                    padding: '12px 16px',
+                                    borderRadius: '12px',
+                                    border: '1px solid #E2E8F0',
+                                    background: '#F8FAFC',
+                                    outline: 'none'
+                                }}
                                 required
                             />
                         </div>
                         <button
                             type="submit"
                             style={{
-                                padding: '12px 24px',
-                                background: '#D32F2F',
-                                color: 'white',
+                                padding: '14px 24px',
+                                background: 'linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%)',
+                                color: '#991B1B',
                                 border: 'none',
-                                borderRadius: '8px',
-                                fontWeight: '600',
+                                borderRadius: '12px',
+                                fontWeight: '700',
                                 cursor: 'pointer',
-                                height: '42px', // Match input height roughly
-                                boxShadow: '0 2px 4px rgba(211, 47, 47, 0.3)'
+                                fontSize: '1rem',
+                                transition: 'transform 0.1s'
                             }}
+                            onMouseDown={(e) => e.target.style.transform = 'scale(0.98)'}
+                            onMouseUp={(e) => e.target.style.transform = 'scale(1)'}
                         >
                             Προσθήκη
                         </button>
