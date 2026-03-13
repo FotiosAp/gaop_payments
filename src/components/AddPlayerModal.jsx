@@ -54,9 +54,9 @@ const AddPlayerModal = ({ onClose, onSave }) => {
     };
 
     return (
-        <div className="modal-overlay" onClick={onClose} style={{ alignItems: 'flex-start', paddingTop: '80px' }}>
+        <div className="modal-overlay" onClick={onClose} style={{ alignItems: 'flex-start', paddingTop: '40px', paddingBottom: '40px' }}>
             {/* Align to top with some padding so it's not centered vertically if screen is small */}
-            <div className="modal-content" onClick={e => e.stopPropagation()} style={{ padding: '24px', maxWidth: '360px', borderRadius: '12px' }}>
+            <div className="modal-content" onClick={e => e.stopPropagation()} style={{ padding: '24px', maxWidth: '360px', borderRadius: '12px', marginBottom: '20px' }}>
                 <div className="modal-title" style={{ fontSize: '1.25rem', marginBottom: '16px', color: '#1E293B' }}>Προσθήκη Αθλητή</div>
 
                 <form onSubmit={handleSubmit}>

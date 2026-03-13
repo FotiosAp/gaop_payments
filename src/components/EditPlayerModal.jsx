@@ -50,8 +50,8 @@ const EditPlayerModal = ({ player, onClose, onSave }) => {
     };
 
     return (
-        <div className="modal-overlay" onClick={onClose} style={{ alignItems: 'flex-start', paddingTop: '80px' }}>
-            <div className="modal-content" onClick={e => e.stopPropagation()} style={{ padding: '24px', maxWidth: '400px', borderRadius: '16px' }}>
+        <div className="modal-overlay" onClick={onClose} style={{ alignItems: 'flex-start', paddingTop: '40px', paddingBottom: '40px' }}>
+            <div className="modal-content" onClick={e => e.stopPropagation()} style={{ padding: '24px', maxWidth: '400px', borderRadius: '16px', marginBottom: '20px' }}>
                 <div className="modal-title" style={{ fontSize: '1.5rem', marginBottom: '20px', color: '#1E293B', fontWeight: '800' }}>Επεξεργασία Στοιχείων</div>
                 <div style={{ marginBottom: '24px', fontSize: '0.9rem', color: '#64748B' }}>
                     Ενημερώστε τα στοιχεία για τον/την <strong>{player.name}</strong>.

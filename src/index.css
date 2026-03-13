@@ -621,6 +621,7 @@ header h1 span {
   align-items: center;
   z-index: 1000;
   animation: fadeIn 0.2s;
+  overflow-y: auto; /* Enable scrolling for tall modals */
 }
 
 .modal-content {
