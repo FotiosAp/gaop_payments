@@ -23,7 +23,9 @@ ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 INSERT INTO users (username, password_hash, role) VALUES
     ('Gaop', crypt('Gaop@2011;', gen_salt('bf')), 'admin'),
     ('GaopAdmin2021!', crypt('Arianos1914!', gen_salt('bf')), 'manager')
-ON CONFLICT (username) DO NOTHING;
+ON CONFLICT (username) DO UPDATE SET 
+    password_hash = EXCLUDED.password_hash,
+    role = EXCLUDED.role;
 
 -- 6. Create secure login function (runs as DB owner, not as anon)
 CREATE OR REPLACE FUNCTION verify_login(p_username TEXT, p_password TEXT)
