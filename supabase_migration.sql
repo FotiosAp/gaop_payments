@@ -19,10 +19,10 @@ ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 -- 4. NO select/insert/update/delete policies → table is fully locked from client
 -- Only the verify_login function (with SECURITY DEFINER) can access it
 
--- 5. Insert existing users (from db.json)
+-- 5. Insert existing users (using correct plaintext passwords to ensure valid hashing)
 INSERT INTO users (username, password_hash, role) VALUES
-    ('Gaop', '$2b$10$SqY55KysiWQaohPwGKABBOhkIXgQY8mMNZGHH9MtqwLl1whRkBplu', 'admin'),
-    ('GaopAdmin2021!', '$2b$10$VGM2RqUOOL8aXzW7JB8DbuUJPwYwTbWszuMBfh8ILzeqn.vBi035C', 'manager')
+    ('Gaop', crypt('Gaop@2011;', gen_salt('bf')), 'admin'),
+    ('GaopAdmin2021!', crypt('Arianos1914!', gen_salt('bf')), 'manager')
 ON CONFLICT (username) DO NOTHING;
 
 -- 6. Create secure login function (runs as DB owner, not as anon)

@@ -9,18 +9,26 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 export const api = {
     // Login via Supabase stored procedure (secure server-side password verification)
     login: async (username, password) => {
+        console.log('Attempting login for user:', username);
+        
         const { data, error } = await supabase.rpc('verify_login', {
             p_username: username,
             p_password: password
         });
 
         if (error) {
-            console.error('Login RPC error:', error);
-            throw new Error('Invalid credentials');
+            console.error('Supabase RPC Error Details:', error);
+            // Check if function exists (404) or permission issue
+            if (error.code === 'PGRST202') {
+                throw new Error('Η υπηρεσία σύνδεσης (SQL Function) δεν βρέθηκε στη βάση.');
+            }
+            throw new Error(`Σφάλμα σύνδεσης: ${error.message}`);
         }
 
+        console.log('RPC Response:', data);
+
         if (!data || !data.success) {
-            throw new Error(data?.error || 'Invalid credentials');
+            throw new Error(data?.error || 'Λάθος όνομα χρήστη ή κωδικός');
         }
 
         // Generate a simple session token (base64 encoded payload)
@@ -30,6 +38,8 @@ export const api = {
             exp: Date.now() + (8 * 60 * 60 * 1000) // 8 hours
         });
         const token = btoa(tokenPayload);
+
+        console.log('Login successful, role:', data.role);
 
         return {
             token,

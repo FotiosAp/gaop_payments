@@ -18,7 +18,7 @@ const LoginPage = () => {
             localStorage.setItem('gaop_role', data.role || 'manager'); // Default to manager if undefined
             window.location.href = '/'; // Full reload to reset app state/api headers
         } catch (err) {
-            setError('Λάθος όνομα χρήστη ή κωδικός');
+            setError(err.message || 'Λάθος όνομα χρήστη ή κωδικός');
         }
     };
 
