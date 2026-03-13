@@ -3,15 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import Dashboard from '../components/Dashboard';
 // import AdvancedAnalytics from '../components/AdvancedAnalytics';
 import AddPlayerModal from '../components/AddPlayerModal';
+import EditPlayerModal from '../components/EditPlayerModal';
 import Header from '../components/Header';
 import { months, CURRENT_YEAR } from '../data/constants';
-import { ChevronLeft, ChevronRight, Phone, Trash2, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Phone, Trash2, Plus, Edit2 } from 'lucide-react';
 
-const Home = ({ role, sections, payments, totalExpected, totalCollected, totalRemaining, totalExpenses, extraIncome, onAddPlayer, onDeletePlayer, onUpdateSection, currentMonthId, setCurrentMonthId, currentYear, setCurrentYear }) => {
+const Home = ({ role, sections, payments, totalExpected, totalCollected, totalRemaining, totalExpenses, extraIncome, onAddPlayer, onDeletePlayer, onUpdatePlayer, onUpdateSection, currentMonthId, setCurrentMonthId, currentYear, setCurrentYear }) => {
     // console.log("Home Render Props:", { currentMonthId, currentYear, sectionsCount: sections ? sections.length : 'null' });
     const navigate = useNavigate();
     const [expandedSection, setExpandedSection] = useState(null);
     const [addingToSection, setAddingToSection] = useState(null); // section object
+    const [editingPlayer, setEditingPlayer] = useState(null); // { sectionId, player }
     const [copiedPhoneId, setCopiedPhoneId] = useState(null);
 
     // Month Navigation Handlers
@@ -77,6 +79,18 @@ const Home = ({ role, sections, payments, totalExpected, totalCollected, totalRe
             onAddPlayer(addingToSection.id, playerData);
             setAddingToSection(null);
         }
+    };
+
+    const handleUpdatePlayerDetails = (playerData) => {
+        if (editingPlayer && onUpdatePlayer) {
+            onUpdatePlayer(editingPlayer.sectionId, editingPlayer.player.id, playerData);
+            setEditingPlayer(null);
+        }
+    };
+
+    const handleOpenEditModal = (sectionId, player, e) => {
+        e.stopPropagation();
+        setEditingPlayer({ sectionId, player });
     };
 
     const copyPhone = (phone, id, e) => {
@@ -362,8 +376,16 @@ const Home = ({ role, sections, payments, totalExpected, totalCollected, totalRe
                                                 )}
                                             </div>
 
-                                            {/* Action Row: Delete Button */}
-                                            <div className="player-action">
+                                            {/* Action Row: Edit & Delete Buttons */}
+                                            <div className="player-action" style={{ gap: '8px' }}>
+                                                <button
+                                                    onClick={(e) => handleOpenEditModal(section.id, player, e)}
+                                                    className="btn-manage"
+                                                    style={{ padding: '6px', minWidth: 'auto', background: '#F1F5F9', color: '#64748B' }}
+                                                    title="Επεξεργασία Στοιχείων"
+                                                >
+                                                    <Edit2 size={18} />
+                                                </button>
                                                 <button
                                                     onClick={(e) => handleDeleteClick(section.id, player, e)}
                                                     className="btn-delete"
@@ -409,6 +431,14 @@ const Home = ({ role, sections, payments, totalExpected, totalCollected, totalRe
                     section={addingToSection}
                     onClose={() => setAddingToSection(null)}
                     onSave={handleSavePlayer}
+                />
+            )}
+
+            {editingPlayer && (
+                <EditPlayerModal
+                    player={editingPlayer.player}
+                    onClose={() => setEditingPlayer(null)}
+                    onSave={handleUpdatePlayerDetails}
                 />
             )}
 

@@ -299,6 +299,7 @@ function App() {
                 onAddPlayer={handleAddPlayer}
                 onDeletePlayer={handleDeletePlayer}
                 onUpdateSection={handleUpdateSection}
+                onUpdatePlayer={handleUpdatePlayer}
               />
             </ProtectedRoute>
           } />
