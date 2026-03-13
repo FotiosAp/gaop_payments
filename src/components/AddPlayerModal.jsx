@@ -123,10 +123,12 @@ const AddPlayerModal = ({ onClose, onSave }) => {
                         <label style={{ ...labelStyle, color: '#DC2626', marginTop: 0, textAlign: 'center' }}>PIN Ασφαλείας</label>
                         <input
                             type="password"
+                            inputMode="numeric"
                             value={pin}
                             onChange={(e) => { setPin(e.target.value); setError(''); }}
                             placeholder="••••"
                             autoComplete="new-password"
+                            pattern="[0-9]*"
                             style={{
                                 ...inputStyle,
                                 textAlign: 'center',

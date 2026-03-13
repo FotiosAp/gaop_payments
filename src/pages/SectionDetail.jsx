@@ -336,12 +336,13 @@ const SectionDetail = ({ sections, payments, onSetPayment, onUpdatePlayer, curre
 
                             <div style={{ marginTop: '20px' }}>
                                 <input
-                                    type="number"
+                                    type="password"
                                     inputMode="numeric"
                                     value={pin}
                                     onChange={(e) => { setPin(e.target.value); setError(''); }}
                                     placeholder="Κωδικός Ασφαλείας"
                                     className="input-field"
+                                    pattern="[0-9]*"
                                     style={{
                                         padding: '12px',
                                         fontSize: '1.2rem',
@@ -372,12 +373,13 @@ const SectionDetail = ({ sections, payments, onSetPayment, onUpdatePlayer, curre
                             Για να ακυρώσετε την πληρωμή του/της <strong>{selectedPlayer.name}</strong>, πληκτρολογήστε τον κωδικό ασφαλείας.
                             <div style={{ marginTop: '20px' }}>
                                 <input
-                                    type="number"
+                                    type="password"
                                     inputMode="numeric"
                                     value={pin}
                                     onChange={(e) => setPin(e.target.value)}
                                     placeholder="Κωδικός Ασφαλείας"
                                     className="input-field"
+                                    pattern="[0-9]*"
                                     style={{
                                         padding: '12px',
                                         fontSize: '1.2rem',
@@ -427,12 +429,13 @@ const SectionDetail = ({ sections, payments, onSetPayment, onUpdatePlayer, curre
 
                                 <label style={{ fontSize: '0.9rem', color: '#555', marginTop: '8px' }}>Κωδικός Ασφαλείας:</label>
                                 <input
-                                    type="number"
+                                    type="password"
                                     inputMode="numeric"
                                     value={pin}
                                     onChange={(e) => { setPin(e.target.value); setError(''); }}
                                     placeholder="PIN"
                                     className="input-field"
+                                    pattern="[0-9]*"
                                     style={{
                                         padding: '12px',
                                         fontSize: '1.2rem',

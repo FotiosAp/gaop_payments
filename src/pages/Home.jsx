@@ -425,10 +425,12 @@ const Home = ({ role, sections, payments, totalExpected, totalCollected, totalRe
                             <div style={{ marginTop: '16px' }}>
                                 <input
                                     type="password"
+                                    inputMode="numeric"
                                     value={pin}
                                     onChange={(e) => { setPin(e.target.value); setDeleteError(''); }}
                                     placeholder="Κωδικός Ασφαλείας"
                                     autoFocus
+                                    pattern="[0-9]*"
                                     style={{
                                         padding: '12px',
                                         fontSize: '1.2rem',
