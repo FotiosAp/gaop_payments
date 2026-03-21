@@ -5,17 +5,10 @@ const AddPlayerModal = ({ onClose, onSave }) => {
     const [parent, setParent] = useState('');
     const [phone, setPhone] = useState('');
     const [price, setPrice] = useState('50'); // Default 50
-    const [pin, setPin] = useState('');
     const [error, setError] = useState('');
 
     const handleSubmit = (e) => {
         e.preventDefault();
-
-        // Validate PIN
-        if (pin !== '2003') {
-            setError('Λάθος κωδικός ασφαλείας');
-            return;
-        }
 
         if (name && parent && price) {
             onSave({
@@ -115,29 +108,6 @@ const AddPlayerModal = ({ onClose, onSave }) => {
                             required
                             style={{ ...inputStyle, fontWeight: '700', color: '#0F172A', fontSize: '1rem', width: '50%', textAlign: 'center' }}
                             onFocus={e => e.target.style.borderColor = '#3B82F6'}
-                            onBlur={e => e.target.style.borderColor = '#E2E8F0'}
-                        />
-                    </div>
-
-                    <div style={{ marginTop: '16px', borderTop: '1px solid #F1F5F9', paddingTop: '12px' }}>
-                        <label style={{ ...labelStyle, color: '#DC2626', marginTop: 0, textAlign: 'center' }}>PIN Ασφαλείας</label>
-                        <input
-                            type="password"
-                            inputMode="numeric"
-                            value={pin}
-                            onChange={(e) => { setPin(e.target.value); setError(''); }}
-                            placeholder="••••"
-                            autoComplete="new-password"
-                            pattern="[0-9]*"
-                            style={{
-                                ...inputStyle,
-                                textAlign: 'center',
-                                letterSpacing: '4px',
-                                fontSize: '1.25rem',
-                                fontWeight: 'bold',
-                                marginTop: '4px'
-                            }}
-                            onFocus={e => e.target.style.borderColor = '#DC2626'}
                             onBlur={e => e.target.style.borderColor = '#E2E8F0'}
                         />
                     </div>

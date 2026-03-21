@@ -4,17 +4,11 @@ const EditPlayerModal = ({ player, onClose, onSave }) => {
     const [name, setName] = useState(player.name || '');
     const [parent, setParent] = useState(player.parent || '');
     const [phone, setPhone] = useState(player.phone || '');
-    const [pin, setPin] = useState('');
     const [error, setError] = useState('');
+    const [showSuccess, setShowSuccess] = useState(false);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-
-        // Validate PIN
-        if (pin !== '2003') {
-            setError('Λάθος κωδικός ασφαλείας');
-            return;
-        }
 
         if (name && parent) {
             onSave({
@@ -22,7 +16,7 @@ const EditPlayerModal = ({ player, onClose, onSave }) => {
                 parent,
                 phone
             });
-            onClose();
+            setShowSuccess(true);
         } else {
             setError('Παρακαλώ συμπληρώστε τα υποχρεωτικά πεδία');
         }
@@ -48,6 +42,30 @@ const EditPlayerModal = ({ player, onClose, onSave }) => {
         textAlign: 'left',
         marginTop: '16px'
     };
+
+    if (showSuccess) {
+        return (
+            <div className="modal-overlay" onClick={onClose} style={{ alignItems: 'center' }}>
+                <div className="modal-content" onClick={e => e.stopPropagation()} style={{ padding: '32px', maxWidth: '300px', borderRadius: '16px', textAlign: 'center', animation: 'slideUp 0.3s' }}>
+                    <div style={{ fontSize: '3.5rem', marginBottom: '16px' }}>✅</div>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#10B981', marginBottom: '8px' }}>
+                        Επιτυχία
+                    </div>
+                    <div style={{ color: '#64748B', fontSize: '1rem', fontWeight: '500', marginBottom: '28px' }}>
+                        Οι αλλαγές αποθηκεύτηκαν επιτυχώς.
+                    </div>
+                    <button 
+                         type="button"
+                         onClick={onClose}
+                         style={{
+                             background: '#10B981', color: 'white', padding: '14px', borderRadius: '10px', border: 'none', fontWeight: '700', cursor: 'pointer', width: '100%', fontSize: '1rem'
+                         }}>
+                         ΟΚ
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="modal-overlay" onClick={onClose} style={{ alignItems: 'flex-start', paddingTop: '40px', paddingBottom: '40px' }}>
@@ -87,28 +105,6 @@ const EditPlayerModal = ({ player, onClose, onSave }) => {
                             value={phone}
                             onChange={(e) => setPhone(e.target.value)}
                             style={inputStyle}
-                        />
-                    </div>
-
-                    <div style={{ marginTop: '24px', borderTop: '2px solid #F1F5F9', paddingTop: '20px' }}>
-                        <label style={{ ...labelStyle, color: '#DC2626', marginTop: 0, textAlign: 'center' }}>PIN Ασφαλείας</label>
-                        <input
-                            type="password"
-                            inputMode="numeric"
-                            value={pin}
-                            onChange={(e) => { setPin(e.target.value); setError(''); }}
-                            placeholder="••••"
-                            pattern="[0-9]*"
-                            required
-                            style={{
-                                ...inputStyle,
-                                textAlign: 'center',
-                                letterSpacing: '8px',
-                                fontSize: '1.5rem',
-                                fontWeight: 'bold',
-                                borderColor: error ? '#EF4444' : '#E2E8F0',
-                                marginTop: '10px'
-                            }}
                         />
                     </div>
 

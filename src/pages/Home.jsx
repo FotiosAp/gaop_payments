@@ -84,7 +84,7 @@ const Home = ({ role, sections, payments, totalExpected, totalCollected, totalRe
     const handleUpdatePlayerDetails = (playerData) => {
         if (editingPlayer && onUpdatePlayer) {
             onUpdatePlayer(editingPlayer.sectionId, editingPlayer.player.id, playerData);
-            setEditingPlayer(null);
+            // setEditingPlayer(null) removed so the modal can show its success pop-up before calling onClose()
         }
     };
 
