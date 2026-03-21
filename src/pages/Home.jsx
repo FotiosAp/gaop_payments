@@ -8,7 +8,7 @@ import Header from '../components/Header';
 import { months, CURRENT_YEAR } from '../data/constants';
 import { ChevronLeft, ChevronRight, Phone, Trash2, Plus, Edit2 } from 'lucide-react';
 
-const Home = ({ role, sections, payments, totalExpected, totalCollected, totalRemaining, totalExpenses, extraIncome, onAddPlayer, onDeletePlayer, onUpdatePlayer, onUpdateSection, currentMonthId, setCurrentMonthId, currentYear, setCurrentYear }) => {
+const Home = ({ role, sections, payments, totalExpected, totalCollected, totalRemaining, totalExpenses, extraIncome, subscriptionExpenses, onAddPlayer, onDeletePlayer, onUpdatePlayer, onUpdateSection, currentMonthId, setCurrentMonthId, currentYear, setCurrentYear }) => {
     // console.log("Home Render Props:", { currentMonthId, currentYear, sectionsCount: sections ? sections.length : 'null' });
     const navigate = useNavigate();
     const [expandedSection, setExpandedSection] = useState(null);
@@ -253,6 +253,7 @@ const Home = ({ role, sections, payments, totalExpected, totalCollected, totalRe
                     totalRemaining={totalRemaining}
                     totalExpenses={totalExpenses}
                     extraIncome={extraIncome}
+                    subscriptionExpenses={subscriptionExpenses}
                 />
             )}
 

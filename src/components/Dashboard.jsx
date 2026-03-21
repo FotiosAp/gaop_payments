@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const Dashboard = ({ totalExpected, totalCollected, totalRemaining, totalExpenses = 0, extraIncome = 0 }) => {
+const Dashboard = ({ totalExpected, totalCollected, totalRemaining, totalExpenses = 0, extraIncome = 0, subscriptionExpenses = 0 }) => {
     const navigate = useNavigate();
 
     // Calculate Total Income (20% of Subscriptions + Extra Manual Income)
@@ -22,6 +22,12 @@ const Dashboard = ({ totalExpected, totalCollected, totalRemaining, totalExpense
     // For visualization, remaining % relative to total
     const remainingPercentage = totalExpected > 0
         ? Math.round((totalRemaining / totalExpected) * 100)
+        : 0;
+
+    // Calculate Profit for 80% View
+    const profit80 = collected80 - subscriptionExpenses;
+    const profit80Percentage = collected80 > 0
+        ? Math.max(0, Math.round((profit80 / collected80) * 100))
         : 0;
 
     return (
@@ -76,25 +82,25 @@ const Dashboard = ({ totalExpected, totalCollected, totalRemaining, totalExpense
                         <div style={{ fontSize: '0.8rem', color: '#666' }}>Υπόλοιπο</div>
                     </div>
 
-                    {/* Circle 3: Total (Always 100%) */}
+                    {/* Circle 3: Profit (80% Collected - Subscription Expenses) */}
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                         <div
                             className="circular-chart"
                             style={{
-                                '--percent': '100%',
-                                '--color-primary': '#1976D2', // Blue
+                                '--percent': `${profit80Percentage}%`,
+                                '--color-primary': profit80 >= 0 ? '#1976D2' : '#D32F2F', // Blue or Red if loss
                                 width: '70px',
                                 height: '70px'
                             }}
                         >
                             <div className="circular-content" style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>
-                                100%
+                                {profit80Percentage}%
                             </div>
                         </div>
-                        <div style={{ fontWeight: '700', fontSize: '1.1rem', marginTop: '8px', color: '#1565C0' }}>
-                            {Number(expected80).toLocaleString('el-GR')}€
+                        <div style={{ fontWeight: '700', fontSize: '1.1rem', marginTop: '8px', color: profit80 >= 0 ? '#1565C0' : '#C62828' }}>
+                            {Number(profit80).toLocaleString('el-GR')}€
                         </div>
-                        <div style={{ fontSize: '0.8rem', color: '#666' }}>Σύνολο</div>
+                        <div style={{ fontSize: '0.8rem', color: '#666' }}>Κέρδος</div>
                     </div>
 
                 </div>

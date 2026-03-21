@@ -14,7 +14,7 @@ const LoginPage = () => {
         try {
             const data = await api.login(username, password);
             localStorage.setItem('gaop_token', data.token);
-            localStorage.setItem('gaop_username', data.username);
+            localStorage.setItem('gaop_username', username); // Use the username the user typed in
             localStorage.setItem('gaop_role', data.role || 'manager'); // Default to manager if undefined
             window.location.href = '/'; // Full reload to reset app state/api headers
         } catch (err) {

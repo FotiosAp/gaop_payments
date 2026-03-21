@@ -225,19 +225,20 @@ function App() {
     }
   }, [enrichedSections, payments, currentYear, currentMonthId]);
 
-  const { totalExpenses, extraIncome } = useMemo(() => {
+  const { totalExpenses, extraIncome, subscriptionExpenses } = useMemo(() => {
     try {
-      if (!financialRecords) return { totalExpenses: 0, extraIncome: 0 };
+      if (!financialRecords) return { totalExpenses: 0, extraIncome: 0, subscriptionExpenses: 0 };
       const monthRecords = financialRecords.filter(r => {
         const d = new Date(r.date);
         return d.getFullYear() === currentYear && d.getMonth() === Number(currentMonthId);
       });
       const exp = monthRecords.filter(r => r.type === 'expense' && r.category !== 'subscription').reduce((s, r) => s + Number(r.amount || 0), 0);
       const inc = monthRecords.filter(r => r.type === 'income').reduce((s, r) => s + Number(r.amount || 0), 0);
-      return { totalExpenses: exp, extraIncome: inc };
+      const subExp = monthRecords.filter(r => r.type === 'expense' && r.category === 'subscription').reduce((s, r) => s + Number(r.amount || 0), 0);
+      return { totalExpenses: exp, extraIncome: inc, subscriptionExpenses: subExp };
     } catch (e) {
       console.warn("Financial Stats Error:", e);
-      return { totalExpenses: 0, extraIncome: 0 };
+      return { totalExpenses: 0, extraIncome: 0, subscriptionExpenses: 0 };
     }
   }, [financialRecords, currentYear, currentMonthId]);
 
@@ -290,6 +291,7 @@ function App() {
                 totalRemaining={totalRemaining}
                 totalExpenses={totalExpenses}
                 extraIncome={extraIncome}
+                subscriptionExpenses={subscriptionExpenses}
 
                 // Pass Debug Info to Home to Display
                 // debugInfo={`Probe: `}
