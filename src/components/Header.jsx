@@ -2,13 +2,17 @@
 import React from 'react';
 import { LogOut, User } from 'lucide-react';
 
-const Header = () => {
-    const username = localStorage.getItem('gaop_username') || 'Admin';
+const Header = ({ session }) => {
+    const username = session?.user?.email || 'Admin';
 
-    const handleLogout = () => {
-        localStorage.removeItem('gaop_token');
-        localStorage.removeItem('gaop_username');
-        window.location.href = '/login';
+    const handleLogout = async () => {
+        try {
+            await api.logout();
+            // Local state will be updated by onAuthStateChange in App.jsx
+        } catch (err) {
+            console.error("Logout error", err);
+            window.location.href = '/login';
+        }
     };
 
     return (

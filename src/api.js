@@ -7,45 +7,45 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Keep logic mostly similar to avoid large rewrites,
 // we just redirect the actual fetching to Supabase instead of `/api/*`
 export const api = {
-    // Login via Supabase stored procedure (secure server-side password verification)
-    login: async (username, password) => {
-        console.log('Attempting login for user:', username);
+    // Official Supabase Authentication
+    login: async (email, password) => {
+        console.log('Attempting login for user:', email);
         
-        const { data, error } = await supabase.rpc('verify_login', {
-            p_username: username,
-            p_password: password
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password
         });
 
         if (error) {
-            console.error('Supabase RPC Error Details:', error);
-            // Check if function exists (404) or permission issue
-            if (error.code === 'PGRST202') {
-                throw new Error('Η υπηρεσία σύνδεσης (SQL Function) δεν βρέθηκε στη βάση.');
-            }
-            throw new Error(`Σφάλμα σύνδεσης: ${error.message}`);
+            console.error('Supabase Auth Error:', error);
+            throw new Error(error.message || 'Λάθος email ή κωδικός');
         }
 
-        console.log('RPC Response:', data);
+        // We can store user role in user_metadata in Supabase Dashboard
+        // under 'Authentication' > 'Users' > 'User Metadata'
+        const role = data.user?.user_metadata?.role || 'manager';
 
-        if (!data || !data.success) {
-            throw new Error(data?.error || 'Λάθος όνομα χρήστη ή κωδικός');
-        }
-
-        // Generate a simple session token (base64 encoded payload)
-        const tokenPayload = JSON.stringify({
-            username: data.username,
-            role: data.role,
-            exp: Date.now() + (8 * 60 * 60 * 1000) // 8 hours
-        });
-        const token = btoa(tokenPayload);
-
-        console.log('Login successful, role:', data.role);
+        console.log('Login successful, role:', role);
 
         return {
-            token,
-            username: data.username,
-            role: data.role
+            user: data.user,
+            session: data.session,
+            role: role
         };
+    },
+
+    logout: async () => {
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+    },
+
+    getSession: async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        return session;
+    },
+
+    onAuthStateChange: (callback) => {
+        return supabase.auth.onAuthStateChange(callback);
     },
 
     // Fetch all data

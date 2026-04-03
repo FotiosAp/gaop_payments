@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
 
 const LoginPage = () => {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -12,13 +12,13 @@ const LoginPage = () => {
         e.preventDefault();
         setError('');
         try {
-            const data = await api.login(username, password);
-            localStorage.setItem('gaop_token', data.token);
-            localStorage.setItem('gaop_username', username); // Use the username the user typed in
-            localStorage.setItem('gaop_role', data.role || 'manager'); // Default to manager if undefined
+            const data = await api.login(email, password);
+            // Supabase client handles storage automatically, but we can set roles/names for UI
+            localStorage.setItem('gaop_username', data.user.email);
+            localStorage.setItem('gaop_role', data.role || 'manager');
             window.location.href = '/'; // Full reload to reset app state/api headers
         } catch (err) {
-            setError(err.message || 'Λάθος όνομα χρήστη ή κωδικός');
+            setError(err.message || 'Λάθος email ή κωδικός');
         }
     };
 
@@ -86,12 +86,12 @@ const LoginPage = () => {
                 )}
 
                 <div style={{ width: '100%', marginBottom: '20px' }}>
-                    <label style={{ display: 'block', marginBottom: '8px', color: '#475569', fontSize: '0.9rem', fontWeight: '600' }}>Όνομα Χρήστη</label>
+                    <label style={{ display: 'block', marginBottom: '8px', color: '#475569', fontSize: '0.9rem', fontWeight: '600' }}>Email</label>
                     <input
-                        type="text"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        placeholder="Εισάγετε όνομα χρήστη"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Εισάγετε το email σας"
                         style={{
                             width: '100%',
                             padding: '14px',

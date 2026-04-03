@@ -33,28 +33,47 @@ function App() {
   const [financialRecords, setFinancialRecords] = useState([]);
   const [settings, setSettings] = useState({});
   const [loading, setLoading] = useState(true);
+  const [session, setSession] = useState(null);
 
   const [currentMonthId, setCurrentMonthId] = useState(() => String(new Date().getMonth()));
   const [currentYear, setCurrentYear] = useState(() => new Date().getFullYear());
 
   useEffect(() => {
-    if (window.location.pathname === '/login') {
-      setLoading(false);
-      return;
-    }
-    api.init()
-      .then(data => {
-        setSections(data.sections || []);
-        setPayments(data.payments || {});
-        setFinancialRecords(data.records || []);
-        setSettings(data.settings || {});
-        
-        setLoading(false);
-      })
-      .catch(err => {
-        console.warn("Init Error:", err);
-        setLoading(false);
-      });
+    // 1. Check current session on mount
+    api.getSession().then(session => {
+        setSession(session);
+        if (session) {
+            // If logged in, fetch initial data
+            api.init().then(data => {
+                setSections(data.sections || []);
+                setPayments(data.payments || {});
+                setFinancialRecords(data.records || []);
+                setSettings(data.settings || {});
+                setLoading(false);
+            }).catch(err => {
+                console.warn("Init Error:", err);
+                setLoading(false);
+            });
+        } else {
+            setLoading(false);
+        }
+    });
+
+    // 2. Listen for auth changes
+    const { data: { subscription } } = api.onAuthStateChange((_event, session) => {
+        setSession(session);
+        if (session) {
+            // Re-fetch data on login
+            api.init().then(data => {
+                setSections(data.sections || []);
+                setPayments(data.payments || {});
+                setFinancialRecords(data.records || []);
+                setSettings(data.settings || {});
+            });
+        }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const updateSectionState = (updatedSection) => {
@@ -281,14 +300,15 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
 
           <Route path="/" element={
-            <ProtectedRoute>
+            <ProtectedRoute session={session}>
               <Home
-                role={localStorage.getItem('gaop_role')}
+                role={session?.user?.user_metadata?.role || 'manager'}
                 sections={enrichedSections || []}
                 payments={payments || {}}
                 currentMonthId={currentMonthId}
                 currentYear={currentYear}
                 settings={settings}
+                session={session}
 
                 totalExpected={totalExpected}
                 totalCollected={totalCollected}
@@ -308,13 +328,13 @@ function App() {
           } />
 
           <Route path="/month/:monthId" element={
-            <ProtectedRoute>
+            <ProtectedRoute session={session}>
               <MonthView sections={enrichedSections} payments={payments} currentYear={currentYear} />
             </ProtectedRoute>
           } />
 
           <Route path="/month/:monthId/section/:id" element={
-            <ProtectedRoute>
+            <ProtectedRoute session={session}>
               <SectionDetail
                 sections={enrichedSections}
                 payments={payments}
@@ -327,7 +347,7 @@ function App() {
           } />
 
           <Route path="/month/:monthId/year/:year/section/:id" element={
-            <ProtectedRoute>
+            <ProtectedRoute session={session}>
               <SectionDetail
                 sections={enrichedSections}
                 payments={payments}
@@ -340,13 +360,13 @@ function App() {
           } />
 
           <Route path="/department/:sectionId/months" element={
-            <ProtectedRoute>
+            <ProtectedRoute session={session}>
               <DepartmentMonths sections={enrichedSections} payments={payments} currentYear={currentYear} currentMonthId={currentMonthId} />
             </ProtectedRoute>
           } />
 
           <Route path="/financial-analysis" element={
-            <ProtectedRoute>
+            <ProtectedRoute session={session}>
               <FinancialDetails
                 records={financialRecords}
                 onAddRecord={handleAddRecord}
@@ -361,7 +381,7 @@ function App() {
           } />
 
           <Route path="/financial-analysis/year" element={
-            <ProtectedRoute>
+            <ProtectedRoute session={session}>
               <AnnualFinancialReport
                 records={financialRecords}
                 financialRecords={financialRecords}
@@ -374,7 +394,7 @@ function App() {
           } />
 
           <Route path="/subscription-analysis" element={
-            <ProtectedRoute>
+            <ProtectedRoute session={session}>
               <SubscriptionDetails
                 sections={enrichedSections || []}
                 payments={payments || {}}

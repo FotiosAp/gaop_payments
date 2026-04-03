@@ -8,7 +8,7 @@ import Header from '../components/Header';
 import { months } from '../data/constants';
 import { ChevronLeft, ChevronRight, Phone, Trash2, Plus, Edit2 } from 'lucide-react';
 
-const Home = ({ role, sections, payments, totalExpected, totalCollected, totalRemaining, totalExpenses, extraIncome, subscriptionExpenses, onAddPlayer, onDeletePlayer, onUpdatePlayer, onUpdateSection, currentMonthId, setCurrentMonthId, currentYear, setCurrentYear, settings }) => {
+const Home = ({ role, sections, payments, totalExpected, totalCollected, totalRemaining, totalExpenses, extraIncome, subscriptionExpenses, onAddPlayer, onDeletePlayer, onUpdatePlayer, onUpdateSection, currentMonthId, setCurrentMonthId, currentYear, setCurrentYear, settings, session }) => {
     // console.log("Home Render Props:", { currentMonthId, currentYear, sectionsCount: sections ? sections.length : 'null' });
     const navigate = useNavigate();
     const [expandedSection, setExpandedSection] = useState(null);
@@ -215,7 +215,7 @@ const Home = ({ role, sections, payments, totalExpected, totalCollected, totalRe
 
     return (
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px', fontFamily: '"Segoe UI", sans-serif' }}>
-            <Header />
+            <Header session={session} />
             <header>
                 <div className="header-brand">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1 }}>
