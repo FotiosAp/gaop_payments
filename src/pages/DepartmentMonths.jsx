@@ -1,9 +1,8 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { months } from '../data/constants';
 import { ArrowLeft } from 'lucide-react';
 
-const DepartmentMonths = ({ sections, payments, currentYear, currentMonthId }) => {
+const DepartmentMonths = ({ sections, payments, currentYear, currentMonthId, months }) => {
     const { sectionId } = useParams();
     const navigate = useNavigate();
 
@@ -12,29 +11,23 @@ const DepartmentMonths = ({ sections, payments, currentYear, currentMonthId }) =
     if (!section) return <div className="app-container">Department not found</div>;
 
     const currentM = parseInt(currentMonthId);
-    // If the selected month is Sep-Dec, we are in the starting year of the season
-    // If Jan-Aug, we are in the ending year of the season
     const seasonStartYear = currentM >= 8 ? currentYear : currentYear - 1;
     const seasonEndYear = seasonStartYear + 1;
 
-    // Build the season months array
-    const seasonMonths = [
-        { id: '8', name: 'Σεπτέμβριος', targetYear: seasonStartYear },
-        { id: '9', name: 'Οκτώβριος', targetYear: seasonStartYear },
-        { id: '10', name: 'Νοέμβριος', targetYear: seasonStartYear },
-        { id: '11', name: 'Δεκέμβριος', targetYear: seasonStartYear },
-        { id: '0', name: 'Ιανουάριος', targetYear: seasonEndYear },
-        { id: '1', name: 'Φεβρουάριος', targetYear: seasonEndYear },
-        { id: '2', name: 'Μάρτιος', targetYear: seasonEndYear },
-        { id: '3', name: 'Απρίλιος', targetYear: seasonEndYear },
-        { id: '4', name: 'Μάιος', targetYear: seasonEndYear },
-        { id: '5', name: 'Ιούνιος', targetYear: seasonEndYear }
-    ];
+    // Helper to get month name from the dynamic months list
+    const getMonthName = (id) => (months || []).find(m => m.id === id)?.name || '';
 
+    // Build the season months array
+    const seasonMonthIds = ['8', '9', '10', '11', '0', '1', '2', '3', '4', '5'];
     if (section.hasSummerPrep) {
-        seasonMonths.push({ id: '6', name: 'Ιούλιος', targetYear: seasonEndYear });
-        seasonMonths.push({ id: '7', name: 'Αύγουστος', targetYear: seasonEndYear });
+        seasonMonthIds.push('6', '7');
     }
+
+    const seasonMonths = seasonMonthIds.map(id => ({
+        id,
+        name: getMonthName(id),
+        targetYear: parseInt(id) >= 8 ? seasonStartYear : seasonEndYear
+    }));
 
     // Identify current month for highlighting
     const today = new Date();

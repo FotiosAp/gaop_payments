@@ -1,9 +1,8 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, PieChart, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
-import { months } from '../data/constants';
 
-const AnnualFinancialReport = ({ records, currentYear, payments, sections }) => {
+const AnnualFinancialReport = ({ records, currentYear, payments, sections, months }) => {
     const navigate = useNavigate();
     const location = useLocation();
 

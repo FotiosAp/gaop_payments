@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Plus, Minus, Trash2, Calendar } from 'lucide-react';
-import { months } from '../data/constants';
 
-const FinancialDetails = ({ records, onAddRecord, onDeleteRecord, currentYear, sections, payments, totalAnnualSubscriptionIncome }) => {
+const FinancialDetails = ({ records, onAddRecord, onDeleteRecord, currentYear, sections, payments, totalAnnualSubscriptionIncome, months }) => {
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -184,13 +183,13 @@ const FinancialDetails = ({ records, onAddRecord, onDeleteRecord, currentYear, s
                     gap: '16px',
                     paddingBottom: '20px'
                 }}>
-                    {Object.entries(months).map(([id, m]) => {
-                        const { expense, income, profit } = getMonthTotals(id);
+                    {(months || []).map((m) => {
+                        const { profit } = getMonthTotals(m.id);
                         return (
                             <div
-                                key={id}
+                                key={m.id}
                                 onClick={() => {
-                                    setSelectedMonthId(id);
+                                    setSelectedMonthId(m.id);
                                     window.scrollTo(0, 0);
                                 }}
                                 className="card-glass"

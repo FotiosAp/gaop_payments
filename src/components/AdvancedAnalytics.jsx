@@ -1,17 +1,15 @@
 import React, { useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { TrendingUp, Award, DollarSign } from 'lucide-react';
-import { months } from '../data/constants';
-
-const AdvancedAnalytics = ({ sections, payments, currentYear }) => {
+const AdvancedAnalytics = ({ sections, payments, currentYear, months }) => {
 
     // 1. Calculate Monthly Revenue for the entire year
     const monthlyRevenueData = useMemo(() => {
-        // Initialize months 0-11 with 0 revenue
-        const data = months.map((m, index) => ({
-            name: m.name.substring(0, 3), // Short name
+        // Initialize from months prop
+        const data = (months || []).map((m) => ({
+            name: m.name.substring(0, 3) + '.', // Short name
             fullName: m.name,
-            monthId: String(index),
+            monthId: m.id,
             amount: 0,
             expected: 0
         }));
@@ -50,14 +48,14 @@ const AdvancedAnalytics = ({ sections, payments, currentYear }) => {
             if (section.players) {
                 section.players.forEach(player => {
                     const price = Number(player.price || 0);
-                    // Check all 12 months
-                    for (let m = 0; m < 12; m++) {
-                        const key = `${currentYear}_${m}_${player.id}`;
+                    // Check all months
+                    (months || []).forEach(m => {
+                        const key = `${currentYear}_${m.id}_${player.id}`;
                         if (payments[key]) {
                             totalPaid += price;
                         }
                         totalExpected += price;
-                    }
+                    });
                 });
             }
 

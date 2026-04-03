@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { months } from '../data/constants';
 import { ArrowLeft, Phone, Check, Edit2 } from 'lucide-react';
 
-const SectionDetail = ({ sections, payments, onSetPayment, onUpdatePlayer, currentYear, settings }) => {
+const SectionDetail = ({ sections, payments, onSetPayment, onUpdatePlayer, currentYear, settings, months }) => {
     const { monthId, year, id: sectionId } = useParams(); // 'id' from router is sectionId
     const navigate = useNavigate();
 

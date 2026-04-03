@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Minus, Trash2 } from 'lucide-react';
-import { months } from '../data/constants';
-
-const SubscriptionDetails = ({ sections = [], payments = {}, currentYear, records = [], onAddRecord, onDeleteRecord }) => {
+const SubscriptionDetails = ({ sections = [], payments = {}, currentYear, records = [], onAddRecord, onDeleteRecord, months }) => {
     const navigate = useNavigate();
     const [selectedMonthId, setSelectedMonthId] = useState(null);
 
@@ -56,8 +54,8 @@ const SubscriptionDetails = ({ sections = [], payments = {}, currentYear, record
         let totalCollected80 = 0;
         let totalExpenses = 0;
 
-        Object.keys(months).forEach(monthId => {
-            const stats = getMonthStats(monthId);
+        (months || []).forEach(m => {
+            const stats = getMonthStats(m.id);
             totalCollected80 += stats.collected80;
             totalExpenses += stats.monthExpenses;
         });
@@ -499,12 +497,12 @@ const SubscriptionDetails = ({ sections = [], payments = {}, currentYear, record
                 gap: '16px',
                 marginBottom: '32px'
             }}>
-                {Object.entries(months).map(([id, m]) => {
-                    const stats = getMonthStats(id);
+                {(months || []).map((m) => {
+                    const stats = getMonthStats(m.id);
                     return (
                         <div
-                            key={id}
-                            onClick={() => handleMonthClick(id)}
+                            key={m.id}
+                            onClick={() => handleMonthClick(m.id)}
                             style={cardStyle}
                             onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.98)'}
                             onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}

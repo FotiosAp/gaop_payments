@@ -1,12 +1,11 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { months } from '../data/constants';
 import { ArrowLeft } from 'lucide-react';
 
-const MonthView = ({ sections, payments, currentYear }) => {
+const MonthView = ({ sections, payments, currentYear, months }) => {
     const { monthId } = useParams();
     const navigate = useNavigate();
-    const month = months.find(m => m.id === monthId);
+    const month = (months || []).find(m => m.id === monthId);
 
     if (!month) return <div className="app-container">Month not found</div>;
 

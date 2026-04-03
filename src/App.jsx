@@ -269,11 +269,11 @@ function App() {
     try {
       if (!enrichedSections || !payments) return 0;
       let total = 0;
-      for (let m = 0; m < 12; m++) {
+      (settings.months || []).forEach(m => {
         enrichedSections.forEach(s => {
           if (s.players) {
             s.players.forEach(p => {
-              const key = `${currentYear}_${m}_${p.id}`;
+              const key = `${currentYear}_${m.id}_${p.id}`;
               const pmt = payments[key];
               if (pmt === true || (pmt && pmt.isPaid)) {
                 const actualAmount = (typeof pmt === 'object' && pmt.amount !== undefined) ? Number(pmt.amount) : Number(p.price || 0);
@@ -282,13 +282,13 @@ function App() {
             });
           }
         });
-      }
+      });
       return total;
     } catch (e) {
       console.warn("Annual Subs Error:", e);
       return 0;
     }
-  }, [enrichedSections, payments, currentYear]);
+  }, [enrichedSections, payments, currentYear, settings.months]);
 
 
   if (loading) return <div>Loading App...</div>;
@@ -309,6 +309,7 @@ function App() {
                 currentYear={currentYear}
                 settings={settings}
                 session={session}
+                months={settings.months || []}
 
                 totalExpected={totalExpected}
                 totalCollected={totalCollected}
@@ -329,7 +330,12 @@ function App() {
 
           <Route path="/month/:monthId" element={
             <ProtectedRoute session={session}>
-              <MonthView sections={enrichedSections} payments={payments} currentYear={currentYear} />
+              <MonthView 
+                sections={enrichedSections} 
+                payments={payments} 
+                currentYear={currentYear} 
+                months={settings.months || []}
+              />
             </ProtectedRoute>
           } />
 
@@ -340,6 +346,7 @@ function App() {
                 payments={payments}
                 currentYear={currentYear}
                 settings={settings}
+                months={settings.months || []}
                 onSetPayment={handleSetPayment}
                 onUpdatePlayer={handleUpdatePlayer}
               />
@@ -353,6 +360,7 @@ function App() {
                 payments={payments}
                 currentYear={currentYear}
                 settings={settings}
+                months={settings.months || []}
                 onSetPayment={handleSetPayment}
                 onUpdatePlayer={handleUpdatePlayer}
               />
@@ -361,7 +369,13 @@ function App() {
 
           <Route path="/department/:sectionId/months" element={
             <ProtectedRoute session={session}>
-              <DepartmentMonths sections={enrichedSections} payments={payments} currentYear={currentYear} currentMonthId={currentMonthId} />
+              <DepartmentMonths 
+                sections={enrichedSections} 
+                payments={payments} 
+                currentYear={currentYear} 
+                currentMonthId={currentMonthId} 
+                months={settings.months || []}
+              />
             </ProtectedRoute>
           } />
 
@@ -376,6 +390,7 @@ function App() {
                 payments={payments}
                 totalAnnualSubscriptionIncome={totalAnnualSubscriptionIncome}
                 settings={settings}
+                months={settings.months || []}
               />
             </ProtectedRoute>
           } />
@@ -389,6 +404,7 @@ function App() {
                 sections={enrichedSections}
                 currentYear={currentYear}
                 settings={settings}
+                months={settings.months || []}
               />
             </ProtectedRoute>
           } />
@@ -403,6 +419,7 @@ function App() {
                 onAddRecord={handleAddRecord}
                 onDeleteRecord={handleDeleteRecord}
                 settings={settings}
+                months={settings.months || []}
               />
             </ProtectedRoute>
           } />
