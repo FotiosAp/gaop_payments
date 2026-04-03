@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { months, CURRENT_YEAR } from '../data/constants';
+import { months } from '../data/constants';
 import { ArrowLeft } from 'lucide-react';
 
 const MonthView = ({ sections, payments, currentYear }) => {

@@ -51,6 +51,15 @@ export const api = {
     // Fetch all data
     init: async () => {
         try {
+            // Fetch Settings
+            const { data: settingsData, error: setErr } = await supabase.from('settings').select('*');
+            if (setErr) throw setErr;
+
+            const settings = {};
+            settingsData.forEach(s => {
+                settings[s.key] = s.value;
+            });
+
             // Fetch Sections
             const { data: sectionsData, error: secErr } = await supabase.from('sections').select('*');
             if (secErr) throw secErr;
@@ -72,8 +81,8 @@ export const api = {
                 }))
             }));
 
-            // User requested explicit ordering of sections
-            const sectionOrder = [
+            // Use Order from Settings if available, otherwise use a fallback
+            const sectionOrder = settings.section_order || [
                 'junior',
                 'u11_boys',
                 'u12_boys',
@@ -115,7 +124,8 @@ export const api = {
             return {
                 sections: enrichedSections,
                 payments: paymentsMap,
-                records: recordsData
+                records: recordsData,
+                settings: settings
             };
         } catch (e) {
             console.error("Supabase Init Error:", e);

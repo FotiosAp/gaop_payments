@@ -31,6 +31,7 @@ function App() {
   const [sections, setSections] = useState([]);
   const [payments, setPayments] = useState({});
   const [financialRecords, setFinancialRecords] = useState([]);
+  const [settings, setSettings] = useState({});
   const [loading, setLoading] = useState(true);
 
   const [currentMonthId, setCurrentMonthId] = useState(() => String(new Date().getMonth()));
@@ -46,6 +47,8 @@ function App() {
         setSections(data.sections || []);
         setPayments(data.payments || {});
         setFinancialRecords(data.records || []);
+        setSettings(data.settings || {});
+        
         setLoading(false);
       })
       .catch(err => {
@@ -77,7 +80,7 @@ function App() {
     const newPlayer = {
       ...playerData,
       id: Date.now().toString(),
-      price: Number(playerData.price || 50),
+      price: Number(playerData.price || settings.default_price || 50),
       parentName: playerData.parent
     };
 
@@ -285,6 +288,7 @@ function App() {
                 payments={payments || {}}
                 currentMonthId={currentMonthId}
                 currentYear={currentYear}
+                settings={settings}
 
                 totalExpected={totalExpected}
                 totalCollected={totalCollected}
@@ -292,9 +296,6 @@ function App() {
                 totalExpenses={totalExpenses}
                 extraIncome={extraIncome}
                 subscriptionExpenses={subscriptionExpenses}
-
-                // Pass Debug Info to Home to Display
-                // debugInfo={`Probe: `}
 
                 setCurrentMonthId={setCurrentMonthId}
                 setCurrentYear={setCurrentYear}
@@ -318,6 +319,7 @@ function App() {
                 sections={enrichedSections}
                 payments={payments}
                 currentYear={currentYear}
+                settings={settings}
                 onSetPayment={handleSetPayment}
                 onUpdatePlayer={handleUpdatePlayer}
               />
@@ -330,6 +332,7 @@ function App() {
                 sections={enrichedSections}
                 payments={payments}
                 currentYear={currentYear}
+                settings={settings}
                 onSetPayment={handleSetPayment}
                 onUpdatePlayer={handleUpdatePlayer}
               />
@@ -352,6 +355,7 @@ function App() {
                 sections={enrichedSections}
                 payments={payments}
                 totalAnnualSubscriptionIncome={totalAnnualSubscriptionIncome}
+                settings={settings}
               />
             </ProtectedRoute>
           } />
@@ -364,6 +368,7 @@ function App() {
                 payments={payments}
                 sections={enrichedSections}
                 currentYear={currentYear}
+                settings={settings}
               />
             </ProtectedRoute>
           } />
@@ -377,6 +382,7 @@ function App() {
                 records={financialRecords}
                 onAddRecord={handleAddRecord}
                 onDeleteRecord={handleDeleteRecord}
+                settings={settings}
               />
             </ProtectedRoute>
           } />

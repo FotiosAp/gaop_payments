@@ -5,10 +5,10 @@ import Dashboard from '../components/Dashboard';
 import AddPlayerModal from '../components/AddPlayerModal';
 import EditPlayerModal from '../components/EditPlayerModal';
 import Header from '../components/Header';
-import { months, CURRENT_YEAR } from '../data/constants';
+import { months } from '../data/constants';
 import { ChevronLeft, ChevronRight, Phone, Trash2, Plus, Edit2 } from 'lucide-react';
 
-const Home = ({ role, sections, payments, totalExpected, totalCollected, totalRemaining, totalExpenses, extraIncome, subscriptionExpenses, onAddPlayer, onDeletePlayer, onUpdatePlayer, onUpdateSection, currentMonthId, setCurrentMonthId, currentYear, setCurrentYear }) => {
+const Home = ({ role, sections, payments, totalExpected, totalCollected, totalRemaining, totalExpenses, extraIncome, subscriptionExpenses, onAddPlayer, onDeletePlayer, onUpdatePlayer, onUpdateSection, currentMonthId, setCurrentMonthId, currentYear, setCurrentYear, settings }) => {
     // console.log("Home Render Props:", { currentMonthId, currentYear, sectionsCount: sections ? sections.length : 'null' });
     const navigate = useNavigate();
     const [expandedSection, setExpandedSection] = useState(null);
@@ -57,7 +57,8 @@ const Home = ({ role, sections, payments, totalExpected, totalCollected, totalRe
     };
 
     const confirmDelete = () => {
-        if (pin === '2003') {
+        const correctPin = settings?.delete_pin || '2003';
+        if (pin === correctPin) {
             onDeletePlayer(playerToDelete.sectionId, playerToDelete.player.id);
             setDeleteModalOpen(false);
             setPlayerToDelete(null);
@@ -456,6 +457,7 @@ const Home = ({ role, sections, payments, totalExpected, totalCollected, totalRe
                     section={addingToSection}
                     onClose={() => setAddingToSection(null)}
                     onSave={handleSavePlayer}
+                    settings={settings}
                 />
             )}
 

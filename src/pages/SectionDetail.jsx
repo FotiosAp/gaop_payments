@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { months, CURRENT_YEAR } from '../data/constants';
+import { months } from '../data/constants';
 import { ArrowLeft, Phone, Check, Edit2 } from 'lucide-react';
 
-const SectionDetail = ({ sections, payments, onSetPayment, onUpdatePlayer, currentYear }) => {
+const SectionDetail = ({ sections, payments, onSetPayment, onUpdatePlayer, currentYear, settings }) => {
     const { monthId, year, id: sectionId } = useParams(); // 'id' from router is sectionId
     const navigate = useNavigate();
 
@@ -75,7 +75,8 @@ const SectionDetail = ({ sections, payments, onSetPayment, onUpdatePlayer, curre
     };
 
     const confirmPayment = () => {
-        if (pin === '2003') {
+        const correctPin = settings?.delete_pin || '2003';
+        if (pin === correctPin) {
             if (selectedPlayer) {
                 onSetPayment(monthId, targetYear, selectedPlayer.id, true); // true = paid
                 setModalOpen(false);
@@ -88,7 +89,8 @@ const SectionDetail = ({ sections, payments, onSetPayment, onUpdatePlayer, curre
     };
 
     const confirmUnpay = () => {
-        if (pin === '2003') {
+        const correctPin = settings?.delete_pin || '2003';
+        if (pin === correctPin) {
             onSetPayment(monthId, targetYear, selectedPlayer.id, false); // false = unpaid
             setAuthModalOpen(false);
             setSelectedPlayer(null);
@@ -99,7 +101,8 @@ const SectionDetail = ({ sections, payments, onSetPayment, onUpdatePlayer, curre
     };
 
     const confirmPriceUpdate = () => {
-        if (pin === '2003') {
+        const correctPin = settings?.delete_pin || '2003';
+        if (pin === correctPin) {
             if (selectedPlayer && onUpdatePlayer) {
                 // Update player manual price
                 onUpdatePlayer(sectionId, selectedPlayer.id, { manualPrice: Number(newPrice) });

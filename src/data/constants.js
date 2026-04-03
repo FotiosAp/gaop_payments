@@ -12,5 +12,3 @@ export const months = [
     { id: '10', name: 'Νοέμβριος' },
     { id: '11', name: 'Δεκέμβριος' },
 ];
-
-export const CURRENT_YEAR = 2026;

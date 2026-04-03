@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 
-const AddPlayerModal = ({ onClose, onSave }) => {
+const AddPlayerModal = ({ onClose, onSave, settings }) => {
     const [name, setName] = useState('');
     const [parent, setParent] = useState('');
     const [phone, setPhone] = useState('');
-    const [price, setPrice] = useState('50'); // Default 50
+    const [price, setPrice] = useState(String(settings?.default_price || '50')); // Dynamic default
     const [error, setError] = useState('');
 
     const handleSubmit = (e) => {
@@ -104,7 +104,7 @@ const AddPlayerModal = ({ onClose, onSave }) => {
                             inputMode="numeric"
                             value={price}
                             onChange={(e) => setPrice(e.target.value)}
-                            placeholder="50"
+                            placeholder={String(settings?.default_price || '50')}
                             required
                             style={{ ...inputStyle, fontWeight: '700', color: '#0F172A', fontSize: '1rem', width: '50%', textAlign: 'center' }}
                             onFocus={e => e.target.style.borderColor = '#3B82F6'}
