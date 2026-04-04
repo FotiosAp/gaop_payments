@@ -2,7 +2,12 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, PieChart, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 
-const AnnualFinancialReport = ({ records, currentYear, payments, sections, months }) => {
+import { useAppContext } from '../context/AppContext';
+
+const AnnualFinancialReport = () => {
+    const { 
+        financialRecords: records, currentYear, payments, sections, months 
+    } = useAppContext();
     const navigate = useNavigate();
     const location = useLocation();
 

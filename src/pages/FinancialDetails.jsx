@@ -2,7 +2,14 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Plus, Minus, Trash2, Calendar } from 'lucide-react';
 
-const FinancialDetails = ({ records, onAddRecord, onDeleteRecord, currentYear, sections, payments, totalAnnualSubscriptionIncome, months }) => {
+import { useAppContext } from '../context/AppContext';
+
+const FinancialDetails = () => {
+    const { 
+        financialRecords: records, onAddRecord, onDeleteRecord, 
+        currentYear, sections, payments, 
+        totalAnnualSubscriptionIncome, months 
+    } = useAppContext();
     const navigate = useNavigate();
     const location = useLocation();
 

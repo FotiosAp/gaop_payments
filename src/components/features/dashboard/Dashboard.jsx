@@ -1,7 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const Dashboard = ({ totalExpected, totalCollected, totalRemaining, totalExpenses = 0, extraIncome = 0, subscriptionExpenses = 0 }) => {
+import { useAppContext } from '../../../context/AppContext';
+import styles from './Dashboard.module.css';
+
+const Dashboard = () => {
+    const { 
+        totalExpected, totalCollected, totalRemaining, 
+        totalExpenses, extraIncome, subscriptionExpenses 
+    } = useAppContext();
     const navigate = useNavigate();
 
     // Calculate Total Income (20% of Subscriptions + Extra Manual Income)
@@ -12,14 +19,12 @@ const Dashboard = ({ totalExpected, totalCollected, totalRemaining, totalExpense
     // Subscription Stats (80% View)
     const collected80 = totalCollected * 0.8;
     const remaining80 = totalRemaining * 0.8;
-    const expected80 = totalExpected * 0.8;
 
-    // Calculate percentages (Percentages remain the same mathematically)
+    // Calculate percentages
     const paidPercentage = totalExpected > 0
         ? Math.round((totalCollected / totalExpected) * 100)
         : 0;
 
-    // For visualization, remaining % relative to total
     const remainingPercentage = totalExpected > 0
         ? Math.round((totalRemaining / totalExpected) * 100)
         : 0;
@@ -31,9 +36,9 @@ const Dashboard = ({ totalExpected, totalCollected, totalRemaining, totalExpense
         : 0;
 
     return (
-        <div className="dashboard">
-            {/* Left Card: Financial Analysis (With 3 circles for all metrics) */}
-            <div className="stat-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div className={styles.dashboard}>
+            {/* Left Card: Financial Analysis */}
+            <div className={styles.statCard}>
                 <div style={{ marginBottom: '20px', fontWeight: '600', color: '#555', fontSize: '1rem' }}>
                     Οικονομική Ανάλυση Συνδρομών (80%)
                 </div>
@@ -43,7 +48,7 @@ const Dashboard = ({ totalExpected, totalCollected, totalRemaining, totalExpense
                     {/* Circle 1: Collected */}
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                         <div
-                            className="circular-chart"
+                            className={styles.circularChart}
                             style={{
                                 '--percent': `${paidPercentage}%`,
                                 '--color-primary': '#4CAF50', // Green
@@ -51,7 +56,7 @@ const Dashboard = ({ totalExpected, totalCollected, totalRemaining, totalExpense
                                 height: '70px'
                             }}
                         >
-                            <div className="circular-content" style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>
+                            <div className={styles.circularContent} style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>
                                 {paidPercentage}%
                             </div>
                         </div>
@@ -64,7 +69,7 @@ const Dashboard = ({ totalExpected, totalCollected, totalRemaining, totalExpense
                     {/* Circle 2: Remaining */}
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                         <div
-                            className="circular-chart"
+                            className={styles.circularChart}
                             style={{
                                 '--percent': `${remainingPercentage}%`,
                                 '--color-primary': '#D32F2F', // Red
@@ -72,7 +77,7 @@ const Dashboard = ({ totalExpected, totalCollected, totalRemaining, totalExpense
                                 height: '70px'
                             }}
                         >
-                            <div className="circular-content" style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>
+                            <div className={styles.circularContent} style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>
                                 {remainingPercentage}%
                             </div>
                         </div>
@@ -82,18 +87,18 @@ const Dashboard = ({ totalExpected, totalCollected, totalRemaining, totalExpense
                         <div style={{ fontSize: '0.8rem', color: '#666' }}>Υπόλοιπο</div>
                     </div>
 
-                    {/* Circle 3: Profit (80% Collected - Subscription Expenses) */}
+                    {/* Circle 3: Profit */}
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                         <div
-                            className="circular-chart"
+                            className={styles.circularChart}
                             style={{
                                 '--percent': `${profit80Percentage}%`,
-                                '--color-primary': profit80 >= 0 ? '#1976D2' : '#D32F2F', // Blue or Red if loss
+                                '--color-primary': profit80 >= 0 ? '#1976D2' : '#D32F2F',
                                 width: '70px',
                                 height: '70px'
                             }}
                         >
-                            <div className="circular-content" style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>
+                            <div className={styles.circularContent} style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>
                                 {profit80Percentage}%
                             </div>
                         </div>
@@ -109,11 +114,11 @@ const Dashboard = ({ totalExpected, totalCollected, totalRemaining, totalExpense
                     <button
                         onClick={() => navigate('/subscription-analysis', { state: { category: 'trainer' } })}
                         style={{
-                            background: '#1976D2', // Blue
+                            background: '#1976D2',
                             border: 'none',
                             borderRadius: '20px',
-                            padding: '8px 20px', // Larger padding
-                            fontSize: '0.9rem', // Larger font
+                            padding: '8px 20px',
+                            fontSize: '0.9rem',
                             color: 'white',
                             fontWeight: '600',
                             cursor: 'pointer',
@@ -126,8 +131,8 @@ const Dashboard = ({ totalExpected, totalCollected, totalRemaining, totalExpense
                 </div>
             </div>
 
-            {/* Right Card: Main Percentage (Overview) */}
-            <div className="stat-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            {/* Right Card: Overview */}
+            <div className={styles.statCard}>
                 <div style={{ marginBottom: '20px', fontWeight: '600', color: '#555', fontSize: '1rem' }}>
                     Οικονομική Ανάλυση Γενικών Εσόδων / Εξόδων
                 </div>
@@ -168,11 +173,11 @@ const Dashboard = ({ totalExpected, totalCollected, totalRemaining, totalExpense
                     <button
                         onClick={() => navigate('/financial-analysis', { state: { category: 'admin' } })}
                         style={{
-                            background: '#1976D2', // Blue
+                            background: '#1976D2',
                             border: 'none',
                             borderRadius: '20px',
-                            padding: '8px 20px', // Larger padding
-                            fontSize: '0.9rem', // Larger font
+                            padding: '8px 20px',
+                            fontSize: '0.9rem',
                             color: 'white',
                             fontWeight: '600',
                             cursor: 'pointer',

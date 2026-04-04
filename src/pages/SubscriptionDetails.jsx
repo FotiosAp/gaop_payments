@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Minus, Trash2 } from 'lucide-react';
-const SubscriptionDetails = ({ sections = [], payments = {}, currentYear, records = [], onAddRecord, onDeleteRecord, months }) => {
+import { useAppContext } from '../context/AppContext';
+
+const SubscriptionDetails = () => {
+    const { 
+        sections, payments, currentYear, 
+        financialRecords: records, onAddRecord, onDeleteRecord, months 
+    } = useAppContext();
     const navigate = useNavigate();
     const [selectedMonthId, setSelectedMonthId] = useState(null);
 

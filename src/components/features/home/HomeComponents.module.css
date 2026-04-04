@@ -1,0 +1,103 @@
+/* SectionCard styles */
+.sectionCard {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.sectionCard:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.sectionHeaderRow {
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  background: linear-gradient(to right, #ffffff, #fafafa);
+}
+
+.sectionInfo h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: #333;
+}
+
+.sectionMeta {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  display: flex;
+  gap: 12px;
+}
+
+.metaPill {
+  background: #E0F2FE;
+  color: #0369A1;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+/* PlayerRow styles */
+.playerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.playerRow:last-child {
+  border-bottom: none;
+}
+
+.playerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.playerName {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-main);
+}
+
+.homeContainer {
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Roboto", sans-serif;
+}
+
+.parentName {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.playerAction {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .playerRow {
+    flex-direction: column;
+    align-items: flex-start;
+    background: white;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    gap: 16px;
+  }
+}

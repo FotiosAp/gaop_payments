@@ -1,8 +1,10 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import { useAppContext } from '../context/AppContext';
 
-const DepartmentMonths = ({ sections, payments, currentYear, currentMonthId, months }) => {
+const DepartmentMonths = () => {
+    const { sections, payments, currentYear, currentMonthId, months } = useAppContext();
     const { sectionId } = useParams();
     const navigate = useNavigate();
 

@@ -2,7 +2,10 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 
-const MonthView = ({ sections, payments, currentYear, months }) => {
+import { useAppContext } from '../context/AppContext';
+
+const MonthView = () => {
+    const { sections, payments, currentYear, months } = useAppContext();
     const { monthId } = useParams();
     const navigate = useNavigate();
     const month = (months || []).find(m => m.id === monthId);
