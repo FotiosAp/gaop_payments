@@ -65,6 +65,20 @@
 
 @media (max-width: 768px) {
   .dashboard {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .dashboard::-webkit-scrollbar {
+    display: none;
+  }
+
+  .statCard {
+    flex: 0 0 90%;
+    scroll-snap-align: center;
   }
 }
